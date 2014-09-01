@@ -11,7 +11,7 @@ class Session(object):
     def start_test(self, name):
         return Test(self, name)
 
-    def set_metadata(self, name, mime_type, data):
+    def attach_metadata(self, name, mime_type, data):
         pass
 
     def get_metadata(self, name):
