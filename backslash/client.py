@@ -4,8 +4,15 @@ import requests
 from urlobject import URLObject as URL
 
 from .session import Session
+from .test import Test
 from ._compat import iteritems
 from sentinels import NOTHING
+
+_TYPES_BY_TYPENAME = {
+    'session': Session,
+    'test': Test,
+}
+
 
 class Backslash(object):
 
@@ -13,7 +20,6 @@ class Backslash(object):
         super(Backslash, self).__init__()
         self.api = API(self, url)
         self._url = URL(url)
-        
 
     def report_session_start(self, hostname=NOTHING):
         """Reports a new session starting
@@ -59,9 +65,10 @@ class API(object):
 
     def _get_objtype(self, json_object):
         typename = json_object['type']
-        if typename == 'session':
-            return Session
-        raise NotImplementedError() # pragma: no cover
+        returned = _TYPES_BY_TYPENAME.get(typename)
+        if returned is None:
+            raise NotImplementedError()  # pragma: no cover
+        return returned
 
     def _serialize_params(self, params):
         if params is None:
@@ -73,4 +80,3 @@ class API(object):
                 continue
             returned[param_name] = param_value
         return json.dumps(returned)
-
