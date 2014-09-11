@@ -3,14 +3,22 @@ import json
 import requests
 from urlobject import URLObject as URL
 
-from .api_object import APIObject
+from .session import Session
+from .test import Test
 from ._compat import iteritems
 from sentinels import NOTHING
+
+_TYPES_BY_TYPENAME = {
+    'session': Session,
+    'test': Test,
+}
+
 
 class Backslash(object):
 
     def __init__(self, url):
         super(Backslash, self).__init__()
+        self.api = API(self, url)
         self._url = URL(url)
 
     def report_session_start(self, hostname=NOTHING):
@@ -18,22 +26,49 @@ class Backslash(object):
 
         :rtype: A session object representing the reported session
         """
-        return self._call_api_single_object('report_session_start', {
+        return self.api.call_function('report_session_start', {
             'hostname': hostname,
         })
 
-    def _call_api_single_object(self, api, params=None):
-        returned = self._call_api(api, params)
-        return APIObject(returned.json()['result'])
 
-    def _call_api(self, api, params=None):
+class API(object):
+
+    def __init__(self, client, url):
+        super(API, self).__init__()
+        self.client = client
+        self.url = URL(url)
+
+    def call_function(self, name, params=None):
         resp = requests.post(
-            self._url.add_path('api').add_path(api),
+            self.url.add_path('api').add_path(name),
             data=self._serialize_params(params),
             headers={'Content-type': 'application/json'},
         )
         resp.raise_for_status()
-        return resp
+
+        return self._normalize_return_value(resp)
+
+    def get(self, path, raw=False):
+        resp = requests.get(self.url.add_path(path))
+        resp.raise_for_status()
+        if raw:
+            return resp.json()
+        else:
+            return self._normalize_return_value(resp)
+
+    def _normalize_return_value(self, response):
+        result = response.json()['result']
+        if result is None:
+            return None
+        assert isinstance(result, dict) and 'type' in result
+        return self._get_objtype(result)(self.client, result)
+
+    def _get_objtype(self, json_object):
+        typename = json_object['type']
+        returned = _TYPES_BY_TYPENAME.get(typename)
+        if returned is None:
+            raise NotImplementedError()  # pragma: no cover
+        return returned
 
     def _serialize_params(self, params):
         if params is None:
