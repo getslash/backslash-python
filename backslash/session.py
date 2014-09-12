@@ -10,7 +10,7 @@ class Session(APIObject):
 
     def report_test_start(self, test_logical_id, name=NOTHING):
         return self.client.api.call_function('report_test_start', {'session_logical_id': self.logical_id,
-                                                                   'logical_id': test_logical_id, 'name': name})
+                                                                   'test_logical_id': test_logical_id, 'name': name})
 
     def set_product(self, name, version=None, revision=None):
         return self.client.api.call_function('set_product', {'logical_id': self.logical_id, 'name': name,
