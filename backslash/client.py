@@ -21,7 +21,7 @@ class Backslash(object):
         self.api = API(self, url)
         self._url = URL(url)
 
-    def report_session_start(self, logical_id,
+    def report_session_start(self, logical_id=NOTHING,
                              hostname=NOTHING,
                              product_name=NOTHING,
                              product_version=NOTHING,
