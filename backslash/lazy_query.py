@@ -8,10 +8,9 @@ from ._compat import xrange
 
 class LazyQuery(object):
 
-    def __init__(self, client, path, objtype, page_size=100):
+    def __init__(self, client, path, page_size=100):
         super(LazyQuery, self).__init__()
         self._client = client
-        self._objtype = objtype
         self._path = path
         self._url = client.api.url.add_path(path)
         self._fetched = collections.defaultdict(lambda: NOTHING)
@@ -59,5 +58,5 @@ class LazyQuery(object):
                 'metadata']['total_num_objects']
         for index, json_obj in enumerate(response_data['result']):
             real_index = ((page_index - 1) * self._page_size) + index
-            self._fetched[real_index] = self._objtype(self._client, json_obj)
+            self._fetched[real_index] = self._client.api.build_api_object(json_obj)
         return response_data

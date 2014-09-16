@@ -4,6 +4,7 @@ import requests
 from urlobject import URLObject as URL
 
 from .session import Session
+from .lazy_query import LazyQuery
 from .test import Test
 from ._compat import iteritems
 from sentinels import NOTHING
@@ -29,6 +30,14 @@ class Backslash(object):
         return self.api.call_function('report_session_start', {
             'hostname': hostname,
         })
+
+    def query_sessions(self):
+        """Queries sessions stored on the server
+
+        :rtype: A lazy query object
+        """
+        return LazyQuery(self, '/rest/sessions')
+
 
 
 class API(object):
@@ -61,6 +70,9 @@ class API(object):
         if result is None:
             return None
         assert isinstance(result, dict) and 'type' in result
+        return self.build_api_object(result)
+
+    def build_api_object(self, result):
         return self._get_objtype(result)(self.client, result)
 
     def _get_objtype(self, json_object):

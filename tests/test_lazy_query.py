@@ -34,7 +34,7 @@ def test_slicing_not_supported(query):
 
 @pytest.fixture
 def query(url, page_size):
-    return LazyQuery(Backslash(url), '/', APIObject, page_size=page_size)
+    return LazyQuery(Backslash(url), '/', page_size=page_size)
 
 
 @pytest.fixture
@@ -95,7 +95,7 @@ class FakeCursor(object):
         while self._current < self._objcount:
             if self._remaining_until_limit is not None and not self._remaining_until_limit:
                 break
-            yield {'id': self._current}
+            yield {'id': self._current, 'type': 'session'}
             if self._remaining_until_limit is not None:
                 self._remaining_until_limit -= 1
             self._current += 1
