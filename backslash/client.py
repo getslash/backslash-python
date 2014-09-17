@@ -22,13 +22,21 @@ class Backslash(object):
         self.api = API(self, url)
         self._url = URL(url)
 
-    def report_session_start(self, hostname=NOTHING):
+    def report_session_start(self, logical_id=NOTHING,
+                             hostname=NOTHING,
+                             product_name=NOTHING,
+                             product_version=NOTHING,
+                             product_revision=NOTHING):
         """Reports a new session starting
 
         :rtype: A session object representing the reported session
         """
         return self.api.call_function('report_session_start', {
             'hostname': hostname,
+            'logical_id': logical_id,
+            'product_name': product_name,
+            'product_version': product_version,
+            'product_revision': product_revision
         })
 
     def query_sessions(self):
