@@ -6,6 +6,14 @@ class APIObject(object):
         self.client = client
         self._data = json_data
 
+    def __eq__(self, other):
+        if not isinstance(other, APIObject):
+            return NotImplemented
+        return self.client is other.client and self._data == other._data
+
+    def __ne__(self, other):
+        return not (self == other)
+
     def __getattr__(self, name):
         try:
             return self._data[name]

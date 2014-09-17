@@ -1,1 +1,5 @@
+Flask
+Flask-Loopback
 pytest
+URLObject
+weber-utils
