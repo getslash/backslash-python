@@ -3,19 +3,28 @@ import collections
 import requests
 from sentinels import NOTHING
 
-from ._compat import xrange
+from ._compat import xrange, iteritems
 
 
 class LazyQuery(object):
 
-    def __init__(self, client, path, page_size=100):
+    def __init__(self, client, path=None, url=None, page_size=100):
         super(LazyQuery, self).__init__()
         self._client = client
-        self._path = path
-        self._url = client.api.url.add_path(path)
+        if url is None:
+            url = client.api.url
+        if path is not None:
+            url = url.add_path(path)
+        self._url = url
         self._fetched = collections.defaultdict(lambda: NOTHING)
         self._total_num_objects = None
         self._page_size = page_size
+
+    def filter(self, **fields):
+        returned_url = self._url
+        for field_name, field_value in iteritems(fields):
+            returned_url = returned_url.add_query_param(field_name, str(field_value))
+        return LazyQuery(self._client, url=returned_url, page_size=self._page_size)
 
     def __repr__(self):
         return '<Query {0!r}>'.format(str(self._url))

@@ -31,6 +31,11 @@ def test_slicing_not_supported(query):
     with pytest.raises(NotImplementedError):
         query[1:20]
 
+def test_querying_simple_equality(query):
+    assert query._url.query == ''
+    query = query.filter(x=1)
+    assert query._url.query == 'x=1'
+
 
 @pytest.fixture
 def query(url, page_size):
@@ -59,7 +64,7 @@ def flask_app(page_size, num_objects):
     @app.route('/')
     @paginated_view(renderer=lambda obj: obj, default_page_size=page_size)
     def view_objects():
-        return FakeCursor(objcount=num_objects)
+        return FakeCursor([{'id': i, 'type': 'session'} for i in range(num_objects)])
 
     return app
 
@@ -75,41 +80,33 @@ def num_objects():
 
 
 def test_fake_cursor_count():
-    assert FakeCursor(1000).count() == 1000
-    assert FakeCursor(1000).offset(10).count() == 990
-    assert FakeCursor(1000).offset(30).limit(50).count() == 50
-    assert FakeCursor(1000).offset(30).limit(50000).count() == 970
+    lst = list(range(1000))
+    assert FakeCursor(lst).count() == 1000
+    assert FakeCursor(lst).offset(10).count() == 990
+    assert FakeCursor(lst).offset(30).limit(50).count() == 50
+    assert FakeCursor(lst).offset(30).limit(50000).count() == 970
 
 
 class FakeCursor(object):
 
-    def __init__(self, objcount=1000, offset=0, limit=None):
+    def __init__(self, lst):
         super(FakeCursor, self).__init__()
-        self._objcount = objcount
-        self._limit = limit
-        self._remaining_until_limit = limit
-        self._offset = offset
-        self._current = offset
+        self._lst = lst
+        self._iterated = False
 
     def __iter__(self):
-        while self._current < self._objcount:
-            if self._remaining_until_limit is not None and not self._remaining_until_limit:
-                break
-            yield {'id': self._current, 'type': 'session'}
-            if self._remaining_until_limit is not None:
-                self._remaining_until_limit -= 1
-            self._current += 1
+        assert not self._iterated
+        for item in self._lst:
+            yield item
 
     def limit(self, limit):
-        return FakeCursor(objcount=self._objcount, offset=self._current, limit=limit)
+        assert not self._iterated, 'Already iterated'
+        return FakeCursor(self._lst[:limit])
 
     def offset(self, offset):
-        assert self._current == self._offset, 'Already iterated'
-        return FakeCursor(objcount=self._objcount, offset=self._offset + offset, limit=self._limit)
+        assert not self._iterated, 'Already iterated'
+        return FakeCursor(self._lst[offset:])
 
     def count(self):
-        assert self._offset == self._current, 'Already iterated'
-        returned = self._objcount - self._offset
-        if self._limit is not None:
-            returned = min(self._limit, returned)
-        return returned
+        assert not self._iterated
+        return len(self._lst)
