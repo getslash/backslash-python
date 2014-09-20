@@ -46,6 +46,12 @@ class Backslash(object):
         """
         return LazyQuery(self, '/rest/sessions')
 
+    def query_tests(self):
+        """Queries tests stored on the server (directly, not via a session)
+
+        :rtype: A lazy query object
+        """
+        return LazyQuery(self, '/rest/tests')
 
 
 class API(object):
