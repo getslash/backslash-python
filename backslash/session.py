@@ -1,7 +1,7 @@
 from sentinels import NOTHING
 
 from .api_object import APIObject
-
+from .lazy_query import LazyQuery
 
 class Session(APIObject):
 
@@ -15,3 +15,10 @@ class Session(APIObject):
     def set_product(self, name, version=None, revision=None):
         return self.client.api.call_function('set_product', {'id': self.id, 'name': name,
                                                              'version': version, 'revision': revision })
+
+    def query_tests(self):
+        """Queries tests of the current session
+
+        :rtype: A lazy query object
+        """
+        return LazyQuery(self.client, '/rest/sessions/' + str(self.id) + '/tests')
