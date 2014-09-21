@@ -21,4 +21,4 @@ class Session(APIObject):
 
         :rtype: A lazy query object
         """
-        return LazyQuery(self.client, '/rest/sessions/' + str(self.id) + '/tests')
+        return LazyQuery(self.client, '/rest/sessions/{0}/tests'.format(self.id))
