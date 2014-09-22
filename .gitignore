@@ -6,3 +6,5 @@ build
 flycheck-*
 dist
 .env
+.coverage
+htmlcov
