@@ -1,5 +1,6 @@
 Flask
 Flask-Loopback
 pytest
+pytest-cov
 URLObject
 weber-utils
