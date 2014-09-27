@@ -13,3 +13,6 @@ class Test(APIObject):
 
     def add_failure(self):
         return self.client.api.call_function('test_add_failure', {'id': self.id})
+
+    def add_metadata(self, metadata):
+        return self.client.api.call_function('test_add_metadata', {'id': self.id, 'metadata': metadata})
