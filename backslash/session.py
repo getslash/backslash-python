@@ -16,6 +16,9 @@ class Session(APIObject):
         return self.client.api.call_function('set_product', {'id': self.id, 'name': name,
                                                              'version': version, 'revision': revision })
 
+    def set_user(self, user_name):
+        return self.client.api.call_function('set_session_user', {'id': self.id, 'user_name': user_name})
+
     def query_tests(self):
         """Queries tests of the current session
 
