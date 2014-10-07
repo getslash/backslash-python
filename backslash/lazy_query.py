@@ -20,8 +20,10 @@ class LazyQuery(object):
         self._total_num_objects = None
         self._page_size = page_size
 
-    def filter(self, **fields):
+    def filter(self, *filter_objects, **fields):
         returned_url = self._url
+        for filter_object in filter_objects:
+            returned_url = filter_object.add_to_url(returned_url)
         for field_name, field_value in iteritems(fields):
             returned_url = returned_url.add_query_param(field_name, str(field_value))
         return LazyQuery(self._client, url=returned_url, page_size=self._page_size)

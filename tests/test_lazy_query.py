@@ -1,4 +1,5 @@
 from uuid import uuid1
+import operator
 
 from flask import Flask
 from flask.ext.loopback import FlaskLoopback
@@ -9,6 +10,7 @@ import pytest
 from backslash import Backslash
 from backslash.api_object import APIObject
 from backslash.lazy_query import LazyQuery
+from backslash import FIELDS
 from weber_utils.pagination import paginated_view
 
 
@@ -20,16 +22,20 @@ def test_count_objects(query, num_objects):
     assert len(query) == num_objects
     assert len(query._fetched) < num_objects
 
+
 def test_getitem(query):
     assert query[20].id == 20
+
 
 def test_last_item(query, num_objects, page_size):
     assert query[-1].id == num_objects - 1
     assert query._fetched[page_size] is NOTHING
 
+
 def test_slicing_not_supported(query):
     with pytest.raises(NotImplementedError):
         query[1:20]
+
 
 def test_querying_simple_equality(query):
     assert query._url.query == ''
@@ -37,9 +43,33 @@ def test_querying_simple_equality(query):
     assert query._url.query == 'x=1'
 
 
+def test_querying_with_field_queries(query, field_value, operator_name, operator_func):
+    query = query.filter(operator_func(FIELDS.field_name, field_value))
+    assert query._url.query == 'field_name={0}%3A{1}'.format(
+        operator_name, field_value)
+
+def test_querying_between(query):
+    assert query.filter(1 <= FIELDS.x <= 2)._url.query == 'x=ge%3A1&x=le%3A2'
+
+
 @pytest.fixture
 def query(url, page_size):
     return LazyQuery(Backslash(url), '/', page_size=page_size)
+
+
+@pytest.fixture(params=['string_value', 2, 2.5])
+def field_value(request):
+    return request.param
+
+
+@pytest.fixture(params=['eq', 'ne', 'gt', 'ge', 'lt', 'le'])
+def operator_name(request):
+    return request.param
+
+
+@pytest.fixture
+def operator_func(operator_name):
+    return getattr(operator, operator_name)
 
 
 @pytest.fixture
