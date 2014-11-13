@@ -20,6 +20,8 @@ class Backslash(object):
     def __init__(self, url):
         super(Backslash, self).__init__()
         self.api = API(self, url)
+        if not url.startswith('http'):
+            url = 'http://{0}'.format(url)
         self._url = URL(url)
 
     def report_session_start(self, logical_id=NOTHING,
