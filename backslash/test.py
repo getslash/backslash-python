@@ -9,10 +9,10 @@ class Test(APIObject):
         self.client.api.call_function('report_test_end', {'id': self.id, 'duration': duration})
 
     def mark_skipped(self):
-        self.client.api.call_function('mark_skipped_test', {'id': self.id})
+        self.client.api.call_function('report_test_skipped', {'id': self.id})
 
     def mark_interrupted(self):
-        self.client.api.call_function('mark_interrupted_test', {'id': self.id})
+        self.client.api.call_function('report_test_interrupted', {'id': self.id})
 
     def add_error(self):
         return self.client.api.call_function('add_test_error', {'id': self.id})
