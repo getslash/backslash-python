@@ -16,8 +16,8 @@ class APIObject(object):
 
     def __getattr__(self, name):
         try:
-            return self._data[name]
-        except LookupError:
+            return self.__dict__['_data'][name]
+        except KeyError:
             raise AttributeError(name)
 
     def refresh(self):
