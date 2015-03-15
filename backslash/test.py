@@ -22,3 +22,12 @@ class Test(APIObject):
 
     def add_metadata(self, metadata):
         return self.client.api.call_function('add_test_metadata', {'id': self.id, 'metadata': metadata})
+
+    def add_error_data(self, exception, exception_type, traceback, timestamp=NOTHING):
+        return self.client.api.call_function('add_test_error_data', {'id': self.id,
+                                                                     'exception': exception,
+                                                                     'exception_type': exception_type,
+                                                                     'traceback': traceback,
+                                                                     'timestamp': timestamp
+                                                                     })
+    
