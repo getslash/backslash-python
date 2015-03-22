@@ -16,7 +16,7 @@ class LazyQuery(object):
         if path is not None:
             url = url.add_path(path)
         if query_params is not None:
-            for (param, value) in query_params.iteritems():
+            for (param, value) in query_params.items():
                 url = url.add_query_param(param, str(value))
         self._url = url
         self._fetched = collections.defaultdict(lambda: NOTHING)
