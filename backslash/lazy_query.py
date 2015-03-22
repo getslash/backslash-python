@@ -8,13 +8,16 @@ from ._compat import xrange, iteritems
 
 class LazyQuery(object):
 
-    def __init__(self, client, path=None, url=None, page_size=100):
+    def __init__(self, client, path=None, url=None, query_params=None, page_size=100):
         super(LazyQuery, self).__init__()
         self._client = client
         if url is None:
             url = client.api.url
         if path is not None:
             url = url.add_path(path)
+        if query_params is not None:
+            for (param, value) in query_params.iteritems():
+                url = url.add_query_param(param, str(value))
         self._url = url
         self._fetched = collections.defaultdict(lambda: NOTHING)
         self._total_num_objects = None
