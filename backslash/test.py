@@ -1,7 +1,7 @@
 from sentinels import NOTHING
 
 from .api_object import APIObject
-
+from .lazy_query import LazyQuery
 
 class Test(APIObject):
 
@@ -30,4 +30,10 @@ class Test(APIObject):
                                                                      'traceback': traceback,
                                                                      'timestamp': timestamp
                                                                      })
-    
+
+    def query_errors(self):
+        """Queries tests of the current session
+
+        :rtype: A lazy query object
+        """
+        return LazyQuery(self.client, '/rest/errors', query_params={'test_id': self.id})

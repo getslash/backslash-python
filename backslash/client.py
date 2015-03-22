@@ -6,12 +6,14 @@ from urlobject import URLObject as URL
 from .session import Session
 from .lazy_query import LazyQuery
 from .test import Test
+from .error import Error
 from ._compat import iteritems
 from sentinels import NOTHING
 
 _TYPES_BY_TYPENAME = {
     'session': Session,
     'test': Test,
+    'error': Error,
 }
 
 
@@ -54,7 +56,6 @@ class Backslash(object):
         :rtype: A lazy query object
         """
         return LazyQuery(self, '/rest/tests')
-
 
 class API(object):
 
