@@ -19,6 +19,9 @@ class Session(APIObject):
     def set_user(self, user_name):
         return self.client.api.call_function('set_session_user', {'id': self.id, 'user_name': user_name})
 
+    def add_metadata(self, metadata):
+        return self.client.api.call_function('add_session_metadata', {'id': self.id, 'metadata': metadata})
+
     def query_tests(self):
         """Queries tests of the current session
 
