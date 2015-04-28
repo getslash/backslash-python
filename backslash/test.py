@@ -39,4 +39,4 @@ class Test(APIObject):
 
         :rtype: A lazy query object
         """
-        return LazyQuery(self.client, '/rest/errors', query_params={'test_id': self.id})
+        return LazyQuery(self.client, '/rest/test_errors', query_params={'test_id': self.id})

@@ -22,9 +22,24 @@ class Session(APIObject):
     def add_metadata(self, metadata):
         return self.client.api.call_function('add_session_metadata', {'id': self.id, 'metadata': metadata})
 
+    def add_error_data(self, exception, exception_type, traceback, timestamp=NOTHING):
+        return self.client.api.call_function('add_session_error_data', {'id': self.id,
+                                                                        'exception': exception,
+                                                                        'exception_type': exception_type,
+                                                                        'traceback': traceback,
+                                                                        'timestamp': timestamp
+                                                                        })
+
     def query_tests(self):
         """Queries tests of the current session
 
         :rtype: A lazy query object
         """
         return LazyQuery(self.client, '/rest/sessions/{0}/tests'.format(self.id))
+
+    def query_errors(self):
+        """Queries tests of the current session
+
+        :rtype: A lazy query object
+        """
+        return LazyQuery(self.client, '/rest/session_errors', query_params={'session_id': self.id})
