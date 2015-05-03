@@ -6,15 +6,14 @@ from urlobject import URLObject as URL
 from .session import Session
 from .lazy_query import LazyQuery
 from .test import Test
-from .error import TestError, SessionError
+from .error import Error
 from ._compat import iteritems
 from sentinels import NOTHING
 
 _TYPES_BY_TYPENAME = {
     'session': Session,
     'test': Test,
-    'test_error': TestError,
-    'session_error': SessionError,
+    'error': Error
 }
 
 

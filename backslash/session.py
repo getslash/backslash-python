@@ -42,4 +42,4 @@ class Session(APIObject):
 
         :rtype: A lazy query object
         """
-        return LazyQuery(self.client, '/rest/session_errors', query_params={'session_id': self.id})
+        return LazyQuery(self.client, '/rest/errors', query_params={'session_id': self.id})
