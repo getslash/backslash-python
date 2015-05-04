@@ -13,7 +13,7 @@ from sentinels import NOTHING
 _TYPES_BY_TYPENAME = {
     'session': Session,
     'test': Test,
-    'error': Error,
+    'error': Error
 }
 
 
