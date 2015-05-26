@@ -34,6 +34,9 @@ class Test(APIObject):
                                                                      'timestamp': timestamp
                                                                      })
 
+    def edit_status(self, status):
+        return self.client.api.call_function('edit_test_status', {'id': self.id, 'status': status})
+
     def query_errors(self):
         """Queries tests of the current session
 
