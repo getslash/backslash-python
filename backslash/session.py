@@ -30,6 +30,9 @@ class Session(APIObject):
                                                                         'timestamp': timestamp
                                                                         })
 
+    def edit_status(self, status):
+        return self.client.api.call_function('edit_session_status', {'id': self.id, 'status': status})
+
     def query_tests(self):
         """Queries tests of the current session
 
