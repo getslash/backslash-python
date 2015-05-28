@@ -1,6 +1,7 @@
 import json
 
 import requests
+from requests.exceptions import HTTPError
 from urlobject import URLObject as URL
 
 from .session import Session
@@ -70,13 +71,13 @@ class API(object):
             data=self._serialize_params(params),
             headers={'Content-type': 'application/json'},
         )
-        resp.raise_for_status()
+        self._raise_for_status(resp)
 
         return self._normalize_return_value(resp)
 
     def get(self, path, raw=False):
         resp = requests.get(self.url.add_path(path))
-        resp.raise_for_status()
+        self._raise_for_status(resp)
         if raw:
             return resp.json()
         else:
@@ -109,3 +110,11 @@ class API(object):
                 continue
             returned[param_name] = param_value
         return json.dumps(returned)
+
+    def _raise_for_status(self, resp):
+        try:
+            resp.raise_for_status()
+        except HTTPError as e:
+            raise HTTPError(
+                '{r.request.method} {r.request.url} {r.status_code}'.format(r=e.response),
+                respone=e.response)

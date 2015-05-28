@@ -24,4 +24,4 @@ class APIObject(object):
         self._data = self._fetch()
 
     def _fetch(self):
-        return self.client.api.get(self.api_path, raw=True)['result']
+        return self.client.api.get(self.api_path, raw=True)
