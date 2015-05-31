@@ -1,7 +1,6 @@
 import json
 
 import requests
-from requests.exceptions import HTTPError
 from urlobject import URLObject as URL
 
 from .session import Session
@@ -9,6 +8,7 @@ from .lazy_query import LazyQuery
 from .test import Test
 from .error import Error
 from ._compat import iteritems
+from .utils import raise_for_status
 from sentinels import NOTHING
 
 _TYPES_BY_TYPENAME = {
@@ -20,12 +20,12 @@ _TYPES_BY_TYPENAME = {
 
 class Backslash(object):
 
-    def __init__(self, url):
+    def __init__(self, url, runtoken):
         super(Backslash, self).__init__()
-        self.api = API(self, url)
         if not url.startswith('http'):
             url = 'http://{0}'.format(url)
         self._url = URL(url)
+        self.api = API(self, url, runtoken)
 
     def report_session_start(self, logical_id=NOTHING,
                              hostname=NOTHING,
@@ -60,24 +60,28 @@ class Backslash(object):
 
 class API(object):
 
-    def __init__(self, client, url):
+    def __init__(self, client, url, runtoken):
         super(API, self).__init__()
         self.client = client
         self.url = URL(url)
+        self.runtoken = runtoken
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Content-type': 'application/json',
+            'X-Backslash-run-token': self.runtoken})
 
     def call_function(self, name, params=None):
-        resp = requests.post(
+        resp = self.session.post(
             self.url.add_path('api').add_path(name),
             data=self._serialize_params(params),
-            headers={'Content-type': 'application/json'},
         )
-        self._raise_for_status(resp)
+        raise_for_status(resp)
 
         return self._normalize_return_value(resp)
 
     def get(self, path, raw=False):
         resp = requests.get(self.url.add_path(path))
-        self._raise_for_status(resp)
+        raise_for_status(resp)
         if raw:
             return resp.json()
         else:
@@ -111,10 +115,3 @@ class API(object):
             returned[param_name] = param_value
         return json.dumps(returned)
 
-    def _raise_for_status(self, resp):
-        try:
-            resp.raise_for_status()
-        except HTTPError as e:
-            raise HTTPError(
-                '{r.request.method} {r.request.url} {r.status_code}'.format(r=e.response),
-                respone=e.response)
