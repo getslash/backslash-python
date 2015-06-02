@@ -24,7 +24,7 @@ class APIObject(object):
         self._data = self._fetch()
 
     def _fetch(self):
-        return self.client.api.get(self.api_path, raw=True)
+        return self.client.api.get(self.api_path, raw=True)[self._data['type']]
 
     def __repr__(self):
         return '<API:{data[type]}:{data[id]}>'.format(data=self._data)

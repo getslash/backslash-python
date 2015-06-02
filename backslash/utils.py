@@ -11,5 +11,5 @@ def raise_for_status(resp):
         resp.raise_for_status()
     except HTTPError as e:
         raise HTTPError(
-            '{0.request.method} {0.request.url}: {0.status_code}'.format(e.resp),
+            '{0.request.method} {0.request.url}: {0.status_code}'.format(e.response),
             response=resp, request=resp.request)
