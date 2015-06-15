@@ -31,6 +31,7 @@ class BackslashPlugin(PluginInterface):
     def session_start(self):
         self.session = self.client.report_session_start(
             logical_id=slash.context.session.id,
+            total_num_tests=slash.context.session.get_total_num_tests(),
             hostname=socket.getfqdn())
 
     def test_start(self):
@@ -43,6 +44,14 @@ class BackslashPlugin(PluginInterface):
 
     def session_end(self):
         self.session.report_end()
+
+    def error_added(self, result, error):
+        kwargs = {'exception': str(error.exception),
+                  'exception_type': error.exception_type.__name__,
+                  'traceback': error.traceback.to_list()}
+        if result is slash.session.results.global_result:
+            self.session.add_error_data(**kwargs)
+        self.current_test.add_error_data(**kwargs)
 
 
     #### Token Setup #########

@@ -31,7 +31,9 @@ class Backslash(object):
                              hostname=NOTHING,
                              product_name=NOTHING,
                              product_version=NOTHING,
-                             product_revision=NOTHING):
+                             product_revision=NOTHING,
+                             total_num_tests=NOTHING,
+    ):
         """Reports a new session starting
 
         :rtype: A session object representing the reported session
@@ -41,7 +43,8 @@ class Backslash(object):
             'logical_id': logical_id,
             'product_name': product_name,
             'product_version': product_version,
-            'product_revision': product_revision
+            'product_revision': product_revision,
+            'total_num_tests': total_num_tests,
         })
 
     def query_sessions(self):
