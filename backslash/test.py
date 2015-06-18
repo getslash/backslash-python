@@ -2,8 +2,9 @@ from sentinels import NOTHING
 
 from .api_object import APIObject
 from .lazy_query import LazyQuery
+from .metadata_holder import MetadataHolder
 
-class Test(APIObject):
+class Test(APIObject, MetadataHolder):
 
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_test_end', {'id': self.id, 'duration': duration})
@@ -19,9 +20,6 @@ class Test(APIObject):
 
     def add_failure(self):
         return self.client.api.call_function('add_test_failure', {'id': self.id})
-
-    def add_metadata(self, metadata):
-        return self.client.api.call_function('add_test_metadata', {'id': self.id, 'metadata': metadata})
 
     def set_conclusion(self, conclusion):
         return self.client.api.call_function('set_test_conclusion', {'id': self.id, 'conclusion': conclusion})

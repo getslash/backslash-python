@@ -94,8 +94,10 @@ class API(object):
         result = response.json()['result']
         if result is None:
             return None
-        assert isinstance(result, dict) and 'type' in result
-        return self.build_api_object(result)
+        assert isinstance(result, dict)
+        if 'type' in result:
+            return self.build_api_object(result)
+        return result
 
     def build_api_object(self, result):
         return self._get_objtype(result)(self.client, result)
