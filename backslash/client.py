@@ -33,6 +33,7 @@ class Backslash(object):
                              product_version=NOTHING,
                              product_revision=NOTHING,
                              total_num_tests=NOTHING,
+                             metadata=NOTHING,
     ):
         """Reports a new session starting
 
@@ -45,6 +46,7 @@ class Backslash(object):
             'product_version': product_version,
             'product_revision': product_revision,
             'total_num_tests': total_num_tests,
+            'metadata': metadata,
         })
 
     def query_sessions(self):
