@@ -1,6 +1,7 @@
 import itertools
 import os
 import socket
+import sys
 import time
 import webbrowser
 
@@ -32,7 +33,16 @@ class BackslashPlugin(PluginInterface):
         self.session = self.client.report_session_start(
             logical_id=slash.context.session.id,
             total_num_tests=slash.context.session.get_total_num_tests(),
-            hostname=socket.getfqdn())
+            hostname=socket.getfqdn(),
+            metadata={
+                'slash': self._get_slash_metadata(),
+            }
+        )
+
+    def _get_slash_metadata(self):
+        return {
+            'commandline': ' '.join(sys.argv),
+        }
 
     def test_start(self):
         self.current_test = self.session.report_test_start(
