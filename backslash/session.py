@@ -17,9 +17,6 @@ class Session(APIObject, MetadataHolder):
         return self.client.api.call_function('set_product', {'id': self.id, 'name': name,
                                                              'version': version, 'revision': revision })
 
-    def set_user(self, user_name):
-        return self.client.api.call_function('set_session_user', {'id': self.id, 'user_name': user_name})
-
     def add_error_data(self, exception, exception_type, traceback, timestamp=NOTHING):
         return self.client.api.call_function('add_session_error_data', {'id': self.id,
                                                                         'exception': exception,
