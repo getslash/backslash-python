@@ -9,9 +9,14 @@ class Session(APIObject, MetadataHolder):
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_session_end', {'id': self.id, 'duration': duration})
 
-    def report_test_start(self, name=NOTHING, test_logical_id=NOTHING):
-        return self.client.api.call_function('report_test_start', {'session_id': self.id,
-                                                                   'test_logical_id': test_logical_id, 'name': name})
+    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING):
+        return self.client.api.call_function(
+            'report_test_start',
+            {'session_id': self.id,
+             'name': name,
+             'class_name': class_name,
+             'file_name': file_name,
+             'test_logical_id': test_logical_id})
 
 
     def add_subject(self, name, product=NOTHING, version=NOTHING, revision=NOTHING):
