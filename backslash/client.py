@@ -1,5 +1,6 @@
 import json
 
+import gossip
 import requests
 from urlobject import URLObject as URL
 
@@ -39,7 +40,7 @@ class Backslash(object):
 
         :rtype: A session object representing the reported session
         """
-        return self.api.call_function('report_session_start', {
+        returned = self.api.call_function('report_session_start', {
             'hostname': hostname,
             'logical_id': logical_id,
             'product_name': product_name,
@@ -48,6 +49,8 @@ class Backslash(object):
             'total_num_tests': total_num_tests,
             'metadata': metadata,
         })
+        gossip.trigger('backslash.session_start', session=returned)
+        return returned
 
     def query_sessions(self):
         """Queries sessions stored on the server

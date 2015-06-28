@@ -5,6 +5,7 @@ with open(os.path.join(os.path.dirname(__file__), "backslash", "__version__.py")
     exec(version_file.read()) # pylint: disable=W0122
 
 _INSTALL_REQUIRES = [
+    "gossip",
     "munch",
     "requests",
     "sentinels",
