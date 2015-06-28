@@ -5,6 +5,8 @@ import sys
 import time
 import webbrowser
 
+import logbook
+
 import requests
 from urlobject import URLObject as URL
 
@@ -15,6 +17,7 @@ from ..client import Backslash as BackslashClient
 from ..utils import ensure_dir
 
 _SLASH_TOKEN_FILE = os.path.expanduser('~/.backslash/run_token')
+
 
 class BackslashPlugin(PluginInterface):
 
@@ -30,14 +33,18 @@ class BackslashPlugin(PluginInterface):
         self.client = BackslashClient(self._url, self._runtoken)
 
     def session_start(self):
-        self.session = self.client.report_session_start(
-            logical_id=slash.context.session.id,
-            total_num_tests=slash.context.session.get_total_num_tests(),
-            hostname=socket.getfqdn(),
-            metadata={
-                'slash': self._get_slash_metadata(),
-            }
-        )
+        try:
+            self.session = self.client.report_session_start(
+                logical_id=slash.context.session.id,
+                total_num_tests=slash.context.session.get_total_num_tests(),
+                hostname=socket.getfqdn(),
+                metadata={
+                    'slash': self._get_slash_metadata(),
+                }
+            )
+        except Exception:
+            logbook.error('Exception occurred while communicating with Backslash', exc_info=True)
+            slash.plugins.manager.uninstall('backslash')
 
     def _get_slash_metadata(self):
         return {
