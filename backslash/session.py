@@ -13,9 +13,11 @@ class Session(APIObject, MetadataHolder):
         return self.client.api.call_function('report_test_start', {'session_id': self.id,
                                                                    'test_logical_id': test_logical_id, 'name': name})
 
-    def set_product(self, name, version=NOTHING, revision=NOTHING):
-        return self.client.api.call_function('set_product', {'id': self.id, 'name': name,
-                                                             'version': version, 'revision': revision })
+
+    def add_subject(self, name, product=NOTHING, version=NOTHING, revision=NOTHING):
+        return self.client.api.call_function(
+            'add_subject',
+            {'session_id': self.id, 'name': name, 'product': product, 'version': version, 'revision': revision})
 
     def add_error_data(self, exception, exception_type, traceback, timestamp=NOTHING):
         return self.client.api.call_function('add_session_error_data', {'id': self.id,
