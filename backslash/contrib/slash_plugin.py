@@ -15,6 +15,7 @@ from slash.plugins import PluginInterface
 
 from ..client import Backslash as BackslashClient
 from ..utils import ensure_dir
+from .utils import normalize_file_path
 
 _SLASH_TOKEN_FILE = os.path.expanduser('~/.backslash/run_token')
 
@@ -53,8 +54,16 @@ class BackslashPlugin(PluginInterface):
 
     def test_start(self):
         self.current_test = self.session.report_test_start(
-            name=slash.context.test.__slash__.factory_name,
-            test_logical_id=slash.context.test.__slash__.id)
+            test_logical_id=slash.context.test.__slash__.id,
+            **self._get_test_info(slash.context.test)
+        )
+
+    def _get_test_info(self, test):
+        return {
+            'file_name': normalize_file_path(test.__slash__.file_path),
+            'class_name': test.__slash__.class_name,
+            'name': test.__slash__.function_name,
+        }
 
     def test_end(self):
         self.current_test.report_end()
