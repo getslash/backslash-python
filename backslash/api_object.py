@@ -22,6 +22,7 @@ class APIObject(object):
 
     def refresh(self):
         self._data = self._fetch()
+        return self
 
     def _fetch(self):
         return self.client.api.get(self.api_path, raw=True)[self._data['type']]
