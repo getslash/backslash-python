@@ -15,16 +15,7 @@ class Test(APIObject, MetadataHolder):
     def mark_interrupted(self):
         self.client.api.call_function('report_test_interrupted', {'id': self.id})
 
-    def add_error(self):
-        return self.client.api.call_function('add_test_error', {'id': self.id})
-
-    def add_failure(self):
-        return self.client.api.call_function('add_test_failure', {'id': self.id})
-
-    def set_conclusion(self, conclusion):
-        return self.client.api.call_function('set_test_conclusion', {'id': self.id, 'conclusion': conclusion})
-
-    def add_error_data(self, exception, exception_type, traceback, timestamp=NOTHING):
+    def add_error_data(self, exception, exception_type, traceback=NOTHING, timestamp=NOTHING):
         return self.client.api.call_function('add_test_error_data', {'id': self.id,
                                                                      'exception': exception,
                                                                      'exception_type': exception_type,
