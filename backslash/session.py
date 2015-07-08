@@ -1,10 +1,11 @@
 from sentinels import NOTHING
 
 from .api_object import APIObject
+from .error_container import ErrorContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
 
-class Session(APIObject, MetadataHolder):
+class Session(APIObject, MetadataHolder, ErrorContainer):
 
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_session_end', {'id': self.id, 'duration': duration})
@@ -23,14 +24,6 @@ class Session(APIObject, MetadataHolder):
         return self.client.api.call_function(
             'add_subject',
             {'session_id': self.id, 'name': name, 'product': product, 'version': version, 'revision': revision})
-
-    def add_error_data(self, exception, exception_type, traceback, timestamp=NOTHING):
-        return self.client.api.call_function('add_session_error_data', {'id': self.id,
-                                                                        'exception': exception,
-                                                                        'exception_type': exception_type,
-                                                                        'traceback': traceback,
-                                                                        'timestamp': timestamp
-                                                                        })
 
     def edit_status(self, status):
         return self.client.api.call_function('edit_session_status', {'id': self.id, 'status': status})

@@ -22,6 +22,8 @@ _SLASH_TOKEN_FILE = os.path.expanduser('~/.backslash/run_token')
 
 class BackslashPlugin(PluginInterface):
 
+    current_test = session = None
+
     def __init__(self, url):
         super(BackslashPlugin, self).__init__()
         self._url = URL(url)
@@ -75,9 +77,13 @@ class BackslashPlugin(PluginInterface):
         kwargs = {'exception': str(error.exception),
                   'exception_type': error.exception_type.__name__,
                   'traceback': error.traceback.to_list()}
+
         if result is slash.session.results.global_result:
-            self.session.add_error_data(**kwargs)
-        self.current_test.add_error_data(**kwargs)
+            if self.session is not None:
+                self.session.add_error(**kwargs)
+        elif self.current_test is not None:
+            if self.current_test is not None:
+                self.current_test.add_error(**kwargs)
 
 
     #### Token Setup #########
