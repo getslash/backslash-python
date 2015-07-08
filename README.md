@@ -1,5 +1,5 @@
 
-![Build Status] (https://secure.travis-ci.org/vmalloc/backslash.png )
+![Build Status] (https://secure.travis-ci.org/slash-testing/backslash-python.png )
 
 
 ![Downloads] (https://pypip.in/d/backslash/badge.png )
