@@ -3,9 +3,9 @@ from sentinels import NOTHING
 
 class ErrorContainer(object):
 
-    def add_error(self, exception, exception_type, traceback, timestamp=NOTHING):
+    def add_error(self, message, exception_type=NOTHING, traceback=NOTHING, timestamp=NOTHING):
         return self.client.api.call_function('add_error', {self._get_id_key(): self.id,
-                                                           'exception': exception,
+                                                           'message': message,
                                                            'exception_type': exception_type,
                                                            'traceback': traceback,
                                                            'timestamp': timestamp
