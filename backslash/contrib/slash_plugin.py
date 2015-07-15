@@ -74,7 +74,7 @@ class BackslashPlugin(PluginInterface):
         self.session.report_end()
 
     def error_added(self, result, error):
-        kwargs = {'exception': str(error.exception),
+        kwargs = {'message': str(error.exception),
                   'exception_type': error.exception_type.__name__,
                   'traceback': error.traceback.to_list()}
 
