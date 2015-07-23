@@ -70,9 +70,10 @@ class LazyQuery(object):
             'page', str(page_index)).add_query_param('page_size', str(self._page_size)))
         raise_for_status(response)
         response_data = response.json()
-        if len(response_data) > 1:
+        keys = [key for key in response_data if key != 'meta']
+        if len(keys) > 1:
             raise RuntimeError('Multiple keys returned')
-        [obj_typename] = response_data
+        [obj_typename] = keys
         if self._typename is not None and obj_typename != self._typename:
             raise RuntimeError('Got different typename in query: {!r} != {!r}'.format(obj_typename, self._typename))
         self._typename = obj_typename
