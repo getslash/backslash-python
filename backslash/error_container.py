@@ -14,7 +14,7 @@ class ErrorContainer(object):
 
     def add_failure(self, message, **kwargs):
         return self.add_error(message, is_failure=True, **kwargs)
-        
+
     def _get_id_key(self):
         if type(self).__name__ == 'Test':
             return 'test_id'
