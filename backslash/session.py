@@ -2,11 +2,13 @@ from sentinels import NOTHING
 
 from .api_object import APIObject
 from .archiveable import Archiveable
+from .commentable import Commentable
 from .error_container import ErrorContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
 
-class Session(APIObject, MetadataHolder, ErrorContainer, Archiveable):
+
+class Session(APIObject, MetadataHolder, ErrorContainer, Archiveable, Commentable):
 
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_session_end', {'id': self.id, 'duration': duration})

@@ -1,11 +1,13 @@
 from sentinels import NOTHING
 
 from .api_object import APIObject
+from .commentable import Commentable
 from .error_container import ErrorContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
 
-class Test(APIObject, MetadataHolder, ErrorContainer):
+
+class Test(APIObject, MetadataHolder, ErrorContainer, Commentable):
 
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_test_end', {'id': self.id, 'duration': duration})

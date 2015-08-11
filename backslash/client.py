@@ -8,6 +8,7 @@ from .session import Session
 from .lazy_query import LazyQuery
 from .test import Test
 from .error import Error
+from .comment import Comment
 from ._compat import iteritems
 from .utils import raise_for_status
 from sentinels import NOTHING
@@ -15,7 +16,8 @@ from sentinels import NOTHING
 _TYPES_BY_TYPENAME = {
     'session': Session,
     'test': Test,
-    'error': Error
+    'error': Error,
+    'comment': Comment,
 }
 
 
@@ -27,6 +29,9 @@ class Backslash(object):
             url = 'http://{0}'.format(url)
         self._url = URL(url)
         self.api = API(self, url, runtoken)
+
+    def delete_comment(self, comment_id):
+        self.api.call_function('delete_comment', {'comment_id': comment_id})
 
     def report_session_start(self, logical_id=NOTHING,
                              hostname=NOTHING,
