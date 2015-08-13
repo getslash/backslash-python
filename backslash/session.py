@@ -44,3 +44,6 @@ class Session(APIObject, MetadataHolder, ErrorContainer, Archiveable, Commentabl
         :rtype: A lazy query object
         """
         return LazyQuery(self.client, '/rest/errors', query_params={'session_id': self.id})
+
+    def toggle_investigated(self):
+        return self.client.api.call_function('toggle_investigated', {'session_id': self.id})
