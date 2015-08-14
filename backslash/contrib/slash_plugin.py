@@ -60,6 +60,9 @@ class BackslashPlugin(PluginInterface):
             **self._get_test_info(slash.context.test)
         )
 
+    def test_skip(self):
+        self.current_test.mark_skipped()
+
     def _get_test_info(self, test):
         return {
             'file_name': normalize_file_path(test.__slash__.file_path),
