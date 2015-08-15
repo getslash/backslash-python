@@ -60,8 +60,8 @@ class BackslashPlugin(PluginInterface):
             **self._get_test_info(slash.context.test)
         )
 
-    def test_skip(self):
-        self.current_test.mark_skipped()
+    def test_skip(self, reason=None):
+        self.current_test.mark_skipped(reason=reason)
 
     def _get_test_info(self, test):
         return {
