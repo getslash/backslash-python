@@ -39,6 +39,7 @@ class Backslash(object):
                              product_version=NOTHING,
                              product_revision=NOTHING,
                              total_num_tests=NOTHING,
+                             user_email=NOTHING,
                              metadata=NOTHING,
     ):
         """Reports a new session starting
@@ -52,6 +53,7 @@ class Backslash(object):
             'product_version': product_version,
             'product_revision': product_revision,
             'total_num_tests': total_num_tests,
+            'user_email': user_email,
             'metadata': metadata,
         })
         gossip.trigger('backslash.session_start', session=returned)
