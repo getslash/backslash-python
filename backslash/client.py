@@ -30,6 +30,9 @@ class Backslash(object):
         self._url = URL(url)
         self.api = API(self, url, runtoken)
 
+    def toggle_user_role(self, user_id, role):
+        return self.api.call_function('toggle_user_role', {'user_id': user_id, 'role': role})
+
     def delete_comment(self, comment_id):
         self.api.call_function('delete_comment', {'comment_id': comment_id})
 
