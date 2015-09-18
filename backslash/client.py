@@ -33,6 +33,9 @@ class Backslash(object):
     def toggle_user_role(self, user_id, role):
         return self.api.call_function('toggle_user_role', {'user_id': user_id, 'role': role})
 
+    def get_user_run_tokens(self, user_id):
+        return self.api.call_function('get_user_run_tokens', {'user_id': user_id})
+
     def delete_comment(self, comment_id):
         self.api.call_function('delete_comment', {'comment_id': comment_id})
 
@@ -109,8 +112,7 @@ class API(object):
         result = response.json()['result']
         if result is None:
             return None
-        assert isinstance(result, dict)
-        if 'type' in result:
+        if isinstance(result, dict) and 'type' in result:
             return self.build_api_object(result)
         return result
 
