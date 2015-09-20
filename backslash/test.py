@@ -3,11 +3,12 @@ from sentinels import NOTHING
 from .api_object import APIObject
 from .commentable import Commentable
 from .error_container import ErrorContainer
+from .warning_container import WarningContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
 
 
-class Test(APIObject, MetadataHolder, ErrorContainer, Commentable):
+class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commentable):
 
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_test_end', {'id': self.id, 'duration': duration})
@@ -28,3 +29,7 @@ class Test(APIObject, MetadataHolder, ErrorContainer, Commentable):
         :rtype: A lazy query object
         """
         return LazyQuery(self.client, '/rest/errors', query_params={'test_id': self.id})
+
+    def get_session(self):
+        return self.client.api.build_api_object(
+            self.client.api.get('/rest/sessions/{0}'.format(self.session_id))['session'])

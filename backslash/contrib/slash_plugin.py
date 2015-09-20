@@ -88,6 +88,12 @@ class BackslashPlugin(PluginInterface):
             if self.current_test is not None:
                 self.current_test.add_error(**kwargs)
 
+    def warning_added(self, warning):
+        kwargs = {'message': warning.message, 'filename': warning.filename, 'lineno': warning.lineno}
+        warning_obj = self.current_test if self.current_test is not None else self.session
+        if warning_obj is not None:
+            warning_obj.add_warning(**kwargs)
+
 
     #### Token Setup #########
     def _ensure_run_token(self):

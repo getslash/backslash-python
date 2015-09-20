@@ -9,6 +9,7 @@ from .lazy_query import LazyQuery
 from .test import Test
 from .error import Error
 from .comment import Comment
+from .warning import Warning
 from ._compat import iteritems
 from .utils import raise_for_status
 from sentinels import NOTHING
@@ -17,6 +18,7 @@ _TYPES_BY_TYPENAME = {
     'session': Session,
     'test': Test,
     'error': Error,
+    'warning': Warning,
     'comment': Comment,
 }
 
@@ -109,9 +111,12 @@ class API(object):
             return self._normalize_return_value(resp)
 
     def _normalize_return_value(self, response):
-        result = response.json()['result']
-        if result is None:
+        json = response.json()
+        if json is None:
             return None
+        result = response.json().get('result')
+        if result is None:
+            return json
         if isinstance(result, dict) and 'type' in result:
             return self.build_api_object(result)
         return result
