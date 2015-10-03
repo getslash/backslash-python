@@ -1,3 +1,4 @@
+import hashlib
 import itertools
 import os
 import socket
@@ -5,6 +6,7 @@ import sys
 import time
 import webbrowser
 
+import git
 import logbook
 
 import requests
@@ -12,6 +14,8 @@ from urlobject import URLObject as URL
 
 import slash
 from slash.plugins import PluginInterface
+
+from sentinels import NOTHING
 
 from ..client import Backslash as BackslashClient
 from ..utils import ensure_dir
@@ -27,6 +31,8 @@ class BackslashPlugin(PluginInterface):
     def __init__(self, url):
         super(BackslashPlugin, self).__init__()
         self._url = URL(url)
+        self._repo_cache = {}
+        self._file_hash_cache = {}
 
     def get_name(self):
         return 'backslash'
@@ -64,11 +70,45 @@ class BackslashPlugin(PluginInterface):
         self.current_test.mark_skipped(reason=reason)
 
     def _get_test_info(self, test):
-        return {
+        returned = {
             'file_name': normalize_file_path(test.__slash__.file_path),
             'class_name': test.__slash__.class_name,
             'name': test.__slash__.function_name,
         }
+        self._update_scm_info(returned)
+        return returned
+
+    def _update_scm_info(self, test_info):
+        test_info['file_hash'] = self._calculate_file_hash(test_info['file_name'])
+        dirname = os.path.dirname(test_info['file_name'])
+        repo = self._repo_cache.get(dirname, NOTHING)
+        if repo is NOTHING:
+            repo = self._repo_cache[dirname] = self._get_git_repo(dirname)
+        if repo is None:
+            return
+        test_info['scm'] = 'git'
+        test_info['scm_revision'] = repo.head.commit.hexsha
+        test_info['scm_dirty'] = bool(repo.untracked_files or repo.index.diff(None) or repo.index.diff(repo.head.commit))
+
+    def _calculate_file_hash(self, filename):
+        returned = self._file_hash_cache.get(filename)
+        if returned is None:
+            with open(filename, 'rb') as f:
+                data = f.read()
+                h = hashlib.sha1()
+                h.update('blob '.encode('utf-8'))
+                h.update('{0}\0'.format(len(data)).encode('utf-8'))
+                h.update(data)
+            returned = self._file_hash_cache[filename] = h.hexdigest()
+
+        return returned
+
+    def _get_git_repo(self, dirname):
+        while dirname != '/':
+            if os.path.isdir(os.path.join(dirname, '.git')):
+                return git.Repo(dirname)
+            dirname = os.path.normpath(os.path.abspath(os.path.join(dirname, '..')))
+        return None
 
     def test_end(self):
         self.current_test.report_end()

@@ -14,11 +14,15 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_session_end', {'id': self.id, 'duration': duration})
 
-    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING):
+    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING, file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING):
         return self.client.api.call_function(
             'report_test_start',
             {'session_id': self.id,
              'name': name,
+             'scm': scm,
+             'file_hash': file_hash,
+             'scm_revision': scm_revision,
+             'scm_dirty': scm_dirty,
              'class_name': class_name,
              'file_name': file_name,
              'test_logical_id': test_logical_id})
