@@ -161,6 +161,8 @@ class BackslashPlugin(PluginInterface):
             if token:
                 return token
             if not opened_browser:
-                webbrowser.open(data['complete'])
+                if not webbrowser.open(data['complete']):
+                    print('Could not open browser to fetch user token. Please login at', data['complete'])
+                print('Waiting for Backlash token...')
                 opened_browser = True
             time.sleep(1)
