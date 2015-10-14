@@ -53,7 +53,7 @@ class BackslashPlugin(PluginInterface):
             )
         except Exception:
             logbook.error('Exception occurred while communicating with Backslash', exc_info=True)
-            slash.plugins.manager.uninstall('backslash')
+            slash.plugins.manager.deactivate('backslash')
 
     def _get_slash_metadata(self):
         return {
