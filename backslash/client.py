@@ -25,10 +25,10 @@ _TYPES_BY_TYPENAME = {
     'comment': Comment,
 }
 
-_RETRY_STATUS_CODES = {
+_RETRY_STATUS_CODES = set([
     requests.codes.bad_gateway,
     requests.codes.gateway_timeout,
-}
+])
 
 class Backslash(object):
 
