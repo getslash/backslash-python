@@ -1,18 +1,21 @@
 import json
+import random
+import time
+
+import requests
 
 import gossip
-import requests
+from sentinels import NOTHING
 from urlobject import URLObject as URL
 
-from .session import Session
-from .lazy_query import LazyQuery
-from .test import Test
-from .error import Error
-from .comment import Comment
-from .warning import Warning
 from ._compat import iteritems
+from .comment import Comment
+from .error import Error
+from .lazy_query import LazyQuery
+from .session import Session
+from .test import Test
 from .utils import raise_for_status
-from sentinels import NOTHING
+from .warning import Warning
 
 _TYPES_BY_TYPENAME = {
     'session': Session,
@@ -22,6 +25,10 @@ _TYPES_BY_TYPENAME = {
     'comment': Comment,
 }
 
+_RETRY_STATUS_CODES = {
+    requests.codes.bad_gateway,
+    requests.codes.gateway_timeout,
+}
 
 class Backslash(object):
 
@@ -94,13 +101,24 @@ class API(object):
             'X-Backslash-run-token': self.runtoken})
 
     def call_function(self, name, params=None):
-        resp = self.session.post(
-            self.url.add_path('api').add_path(name),
-            data=self._serialize_params(params),
-        )
+        for retry in self._iter_retries():
+            resp = self.session.post(
+                self.url.add_path('api').add_path(name),
+                data=self._serialize_params(params),
+            )
+            if resp.status_code not in _RETRY_STATUS_CODES:
+                break
         raise_for_status(resp)
 
         return self._normalize_return_value(resp)
+
+    def _iter_retries(self, timeout=30, sleep_range=(3, 10)):
+        start_time = time.time()
+        end_time = start_time + timeout
+        while True:
+            yield
+            if time.time() < end_time:
+                time.sleep(random.randrange(*sleep_range))
 
     def get(self, path, raw=False):
         resp = requests.get(self.url.add_path(path))
@@ -141,4 +159,3 @@ class API(object):
                 continue
             returned[param_name] = param_value
         return json.dumps(returned)
-
