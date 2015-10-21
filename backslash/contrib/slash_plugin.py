@@ -169,8 +169,13 @@ class BackslashPlugin(PluginInterface):
             if token:
                 return token
             if not opened_browser:
-                if not webbrowser.open(data['complete']):
+                if not self._browse_url(data['complete']):
                     print('Could not open browser to fetch user token. Please login at', data['complete'])
                 print('Waiting for Backlash token...')
                 opened_browser = True
             time.sleep(1)
+
+    def _browse_url(self, url):
+        if 'linux' in sys.platform and os.environ.get('DISPLAY') is None:
+            return False # can't start browser
+        return webbrowser.open_new(url)
