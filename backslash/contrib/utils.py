@@ -4,6 +4,8 @@ _SPECIAL_DIRS = ('.git', '.hg', '.svn')
 
 def normalize_file_path(path):
     path = str(path)
+    if path.endswith('.pyc'):
+        path = path[:-1]
     dirname = os.path.normpath(path)
     while dirname != '/':
         for special_dir in _SPECIAL_DIRS:

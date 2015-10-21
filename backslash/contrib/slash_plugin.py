@@ -23,6 +23,8 @@ from .utils import normalize_file_path
 
 _SLASH_TOKEN_FILE = os.path.expanduser('~/.backslash/run_token')
 
+_logger = logbook.Logger(__name__)
+
 
 class BackslashPlugin(PluginInterface):
 
@@ -52,7 +54,7 @@ class BackslashPlugin(PluginInterface):
                 }
             )
         except Exception:
-            logbook.error('Exception occurred while communicating with Backslash', exc_info=True)
+            _logger.error('Exception occurred while communicating with Backslash', exc_info=True)
             slash.plugins.manager.deactivate('backslash')
 
     def _get_slash_metadata(self):
@@ -93,13 +95,19 @@ class BackslashPlugin(PluginInterface):
     def _calculate_file_hash(self, filename):
         returned = self._file_hash_cache.get(filename)
         if returned is None:
-            with open(filename, 'rb') as f:
-                data = f.read()
-                h = hashlib.sha1()
-                h.update('blob '.encode('utf-8'))
-                h.update('{0}\0'.format(len(data)).encode('utf-8'))
-                h.update(data)
-            returned = self._file_hash_cache[filename] = h.hexdigest()
+            try:
+                with open(filename, 'rb') as f:
+                    data = f.read()
+                    h = hashlib.sha1()
+                    h.update('blob '.encode('utf-8'))
+                    h.update('{0}\0'.format(len(data)).encode('utf-8'))
+                    h.update(data)
+            except IOError as e:
+                _logger.debug('Ignoring IOError {0!r} when calculating file hash for {1}', e, filename)
+                returned = None
+            else:
+                returned = h.hexdigest()
+            self._file_hash_cache[filename] = returned
 
         return returned
 
