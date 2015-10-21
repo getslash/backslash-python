@@ -1,3 +1,4 @@
+from __future__ import print_function
 import hashlib
 import itertools
 import os
@@ -20,6 +21,7 @@ from sentinels import NOTHING
 from ..client import Backslash as BackslashClient
 from ..utils import ensure_dir
 from .utils import normalize_file_path
+
 
 _SLASH_TOKEN_FILE = os.path.expanduser('~/.backslash/run_token')
 
