@@ -74,11 +74,19 @@ class BackslashPlugin(PluginInterface):
         self.current_test.mark_skipped(reason=reason)
 
     def _get_test_info(self, test):
-        returned = {
-            'file_name': normalize_file_path(test.__slash__.file_path),
-            'class_name': test.__slash__.class_name,
-            'name': test.__slash__.function_name,
-        }
+        if test.__slash__.is_interactive():
+            returned = {
+                'file_name': '<interactive>',
+                'class_name': '<interactive>',
+                'name': '<interactive>',
+                'is_interactive': True
+            }
+        else:
+            returned = {
+                'file_name': normalize_file_path(test.__slash__.file_path),
+                'class_name': test.__slash__.class_name,
+                'name': test.__slash__.function_name,
+                }
         self._update_scm_info(returned)
         return returned
 
