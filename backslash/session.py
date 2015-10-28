@@ -15,6 +15,9 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_session_end', {'id': self.id, 'duration': duration})
 
+    def send_keepalive(self):
+        self.client.api.call_function('send_keepalive', {'session_id': self.id})
+
     def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING, file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING, is_interactive=NOTHING):
         return self.client.api.call_function(
             'report_test_start',

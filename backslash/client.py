@@ -50,12 +50,10 @@ class Backslash(object):
 
     def report_session_start(self, logical_id=NOTHING,
                              hostname=NOTHING,
-                             product_name=NOTHING,
-                             product_version=NOTHING,
-                             product_revision=NOTHING,
                              total_num_tests=NOTHING,
                              user_email=NOTHING,
                              metadata=NOTHING,
+                             keepalive_interval=NOTHING,
     ):
         """Reports a new session starting
 
@@ -64,12 +62,10 @@ class Backslash(object):
         returned = self.api.call_function('report_session_start', {
             'hostname': hostname,
             'logical_id': logical_id,
-            'product_name': product_name,
-            'product_version': product_version,
-            'product_revision': product_revision,
             'total_num_tests': total_num_tests,
             'user_email': user_email,
             'metadata': metadata,
+            'keepalive_interval': keepalive_interval,
         })
         return returned
 
