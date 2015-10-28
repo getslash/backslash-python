@@ -6,7 +6,6 @@ import time
 
 import requests
 
-import gossip
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
@@ -72,7 +71,6 @@ class Backslash(object):
             'user_email': user_email,
             'metadata': metadata,
         })
-        gossip.trigger('backslash.session_start', session=returned)
         return returned
 
     def query_sessions(self):

@@ -6,7 +6,6 @@ with open(os.path.join(os.path.dirname(__file__), "backslash", "__version__.py")
 
 _INSTALL_REQUIRES = [
     "GitPython",
-    "gossip",
     "munch",
     "requests",
     "sentinels",
