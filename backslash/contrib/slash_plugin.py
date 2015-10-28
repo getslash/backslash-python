@@ -55,7 +55,7 @@ class BackslashPlugin(PluginInterface):
                     'slash': self._get_slash_metadata(),
                 }
             )
-        except Exception:
+        except Exception: # pylint: disable=broad-except
             _logger.error('Exception occurred while communicating with Backslash', exc_info=True)
             slash.plugins.manager.deactivate('backslash')
 

@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 from sentinels import NOTHING
 
 from .api_object import APIObject

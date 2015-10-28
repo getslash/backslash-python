@@ -1,3 +1,5 @@
+# pylint: disable=no-member
+
 import json
 import random
 import time
@@ -29,7 +31,6 @@ _RETRY_STATUS_CODES = set([
     requests.codes.bad_gateway,
     requests.codes.gateway_timeout,
 ])
-
 class Backslash(object):
 
     def __init__(self, url, runtoken):
@@ -101,7 +102,7 @@ class API(object):
             'X-Backslash-run-token': self.runtoken})
 
     def call_function(self, name, params=None):
-        for retry in self._iter_retries():
+        for _ in self._iter_retries():
             resp = self.session.post(
                 self.url.add_path('api').add_path(name),
                 data=self._serialize_params(params),
