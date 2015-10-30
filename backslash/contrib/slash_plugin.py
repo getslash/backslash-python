@@ -144,9 +144,12 @@ class BackslashPlugin(PluginInterface):
         self.current_test.report_end()
 
     def session_end(self):
-        if self._keepalive_thread is not None:
-            self._keepalive_thread.stop()
-        self.session.report_end()
+        try:
+            if self._keepalive_thread is not None:
+                self._keepalive_thread.stop()
+            self.session.report_end()
+        except Exception:
+            _logger.error('Exception ignored in session_end', exc_info=True)
 
     def error_added(self, result, error):
         kwargs = {'message': str(error.exception),
