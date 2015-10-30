@@ -57,7 +57,8 @@ class BackslashPlugin(PluginInterface):
                 keepalive_interval=self._keepalive_interval,
                 metadata={
                     'slash': self._get_slash_metadata(),
-                }
+                },
+                **self._get_extra_session_start_kwargs()
             )
         except Exception: # pylint: disable=broad-except
             _logger.error('Exception occurred while communicating with Backslash', exc_info=True)
@@ -66,6 +67,9 @@ class BackslashPlugin(PluginInterface):
         if self._keepalive_interval is not None:
             self._keepalive_thread = KeepaliveThread(self.client, self.session)
             self._keepalive_thread.start()
+
+    def _get_extra_session_start_kwargs(self):
+        return {}
 
     def _get_slash_metadata(self):
         return {
