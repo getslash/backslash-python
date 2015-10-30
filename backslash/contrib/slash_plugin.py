@@ -65,7 +65,7 @@ class BackslashPlugin(PluginInterface):
             slash.plugins.manager.deactivate('backslash')
 
         if self._keepalive_interval is not None:
-            self._keepalive_thread = KeepaliveThread(self.client, self.session)
+            self._keepalive_thread = KeepaliveThread(self.client, self.session, self._keepalive_interval)
             self._keepalive_thread.start()
 
     def _get_extra_session_start_kwargs(self):

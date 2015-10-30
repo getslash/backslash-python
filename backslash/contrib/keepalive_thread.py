@@ -6,11 +6,11 @@ _logger = logbook.Logger(__name__)
 
 class KeepaliveThread(threading.Thread):
 
-    def __init__(self, client, session):
+    def __init__(self, client, session, interval):
         super(KeepaliveThread, self).__init__()
         self._client = client
         self._session = session
-        self._interval = self._session.keepalive_interval / 2.0
+        self._interval = interval / 2.0
         self._stopped_event = threading.Event()
         self.daemon = True
 
