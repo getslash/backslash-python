@@ -60,6 +60,7 @@ class Backslash(object):
                              user_email=NOTHING,
                              metadata=NOTHING,
                              keepalive_interval=NOTHING,
+                             subjects=NOTHING,
     ):
         """Reports a new session starting
 
@@ -72,6 +73,7 @@ class Backslash(object):
             'user_email': user_email,
             'metadata': metadata,
             'keepalive_interval': keepalive_interval,
+            'subjects': subjects,
         })
         return returned
 
