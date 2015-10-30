@@ -4,6 +4,7 @@ import json
 import random
 import time
 
+import logbook
 import requests
 
 from sentinels import NOTHING
@@ -30,6 +31,11 @@ _RETRY_STATUS_CODES = set([
     requests.codes.bad_gateway,
     requests.codes.gateway_timeout,
 ])
+
+_logger = logbook.Logger(__name__)
+
+
+
 class Backslash(object):
 
     def __init__(self, url, runtoken):
@@ -97,6 +103,7 @@ class API(object):
 
     def call_function(self, name, params=None):
         for _ in self._iter_retries():
+            _logger.trace('API: {0} {1}', name, params)
             resp = self.session.post(
                 self.url.add_path('api').add_path(name),
                 data=self._serialize_params(params),
