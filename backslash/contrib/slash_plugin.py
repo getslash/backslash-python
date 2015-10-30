@@ -4,6 +4,7 @@ import itertools
 import os
 import socket
 import sys
+from .keepalive_thread import KeepaliveThread
 import time
 import webbrowser
 
@@ -32,11 +33,13 @@ class BackslashPlugin(PluginInterface):
 
     current_test = session = None
 
-    def __init__(self, url):
+    def __init__(self, url, keepalive_interval=None):
         super(BackslashPlugin, self).__init__()
         self._url = URL(url)
         self._repo_cache = {}
         self._file_hash_cache = {}
+        self._keepalive_interval = keepalive_interval
+        self._keepalive_thread = None
 
     def get_name(self):
         return 'backslash'
@@ -51,6 +54,7 @@ class BackslashPlugin(PluginInterface):
                 logical_id=slash.context.session.id,
                 total_num_tests=slash.context.session.get_total_num_tests(),
                 hostname=socket.getfqdn(),
+                keepalive_interval=self._keepalive_interval,
                 metadata={
                     'slash': self._get_slash_metadata(),
                 }
@@ -58,6 +62,10 @@ class BackslashPlugin(PluginInterface):
         except Exception: # pylint: disable=broad-except
             _logger.error('Exception occurred while communicating with Backslash', exc_info=True)
             slash.plugins.manager.deactivate('backslash')
+
+        if self._keepalive_interval is not None:
+            self._keepalive_thread = KeepaliveThread(self.client, self.session)
+            self._keepalive_thread.start()
 
     def _get_slash_metadata(self):
         return {
@@ -132,6 +140,8 @@ class BackslashPlugin(PluginInterface):
         self.current_test.report_end()
 
     def session_end(self):
+        if self._keepalive_thread is not None:
+            self._keepalive_thread.stop()
         self.session.report_end()
 
     def error_added(self, result, error):
