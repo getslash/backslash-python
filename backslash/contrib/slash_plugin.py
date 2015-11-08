@@ -19,7 +19,7 @@ from slash.plugins import PluginInterface
 
 from sentinels import NOTHING
 
-from ..client import Backslash as BackslashClient
+from ..client import Backslash as BackslashClient, ParamsTooLarge
 from ..utils import ensure_dir
 from .utils import normalize_file_path
 
@@ -155,12 +155,21 @@ class BackslashPlugin(PluginInterface):
                   'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
                   'traceback': error.traceback.to_list()}
 
-        if result is slash.session.results.global_result:
-            if self.session is not None:
-                self.session.add_error(**kwargs)
-        elif self.current_test is not None:
-            if self.current_test is not None:
-                self.current_test.add_error(**kwargs)
+        for compact_variables in [False, True]:
+            if compact_variables:
+                for frame in kwargs['traceback']:
+                    frame['globals'] = None
+                    frame['locals'] = None
+            try:
+                if result is slash.session.results.global_result:
+                    if self.session is not None:
+                        self.session.add_error(**kwargs)
+                elif self.current_test is not None:
+                    if self.current_test is not None:
+                        self.current_test.add_error(**kwargs)
+            except ParamsTooLarge:
+                if compact_variables:
+                    raise
 
     def warning_added(self, warning):
         kwargs = {'message': warning.message, 'filename': warning.filename, 'lineno': warning.lineno}
@@ -205,3 +214,4 @@ class BackslashPlugin(PluginInterface):
         if 'linux' in sys.platform and os.environ.get('DISPLAY') is None:
             return False # can't start browser
         return webbrowser.open_new(url)
+

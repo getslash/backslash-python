@@ -35,6 +35,11 @@ _RETRY_STATUS_CODES = set([
 _logger = logbook.Logger(__name__)
 
 
+_MAX_PARAMS_SIZE = 1000000 # 1Mb
+
+class ParamsTooLarge(Exception):
+    pass
+
 
 class Backslash(object):
 
@@ -162,4 +167,7 @@ class API(object):
             if param_value is NOTHING:
                 continue
             returned[param_name] = param_value
-        return json.dumps(returned)
+        returned = json.dumps(returned)
+        if len(returned) > _MAX_PARAMS_SIZE:
+            raise ParamsTooLarge()
+        return returned
