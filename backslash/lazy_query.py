@@ -82,3 +82,7 @@ class LazyQuery(object):
             real_index = ((page_index - 1) * self._page_size) + index
             self._fetched[real_index] = self._client.api.build_api_object(json_obj)
         return response_data
+
+    def count(self):
+        self._fetch_index(0)
+        return self._total_num_objects
