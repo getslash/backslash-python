@@ -105,7 +105,6 @@ class API(object):
         self.runtoken = runtoken
         self.session = requests.Session()
         self.session.headers.update({
-            'Content-type': 'application/json',
             'X-Backslash-run-token': self.runtoken})
 
     def call_function(self, name, params=None):
@@ -114,6 +113,9 @@ class API(object):
             resp = self.session.post(
                 self.url.add_path('api').add_path(name),
                 data=self._serialize_params(params),
+                headers={
+                    'Content-type': 'application/json',
+                }
             )
             if resp.status_code not in _RETRY_STATUS_CODES:
                 break
