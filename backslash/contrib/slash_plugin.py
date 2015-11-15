@@ -170,6 +170,9 @@ class BackslashPlugin(PluginInterface):
             except ParamsTooLarge:
                 if compact_variables:
                     raise
+                # continue to try compacting
+            else:
+                break
 
     def warning_added(self, warning):
         kwargs = {'message': warning.message, 'filename': warning.filename, 'lineno': warning.lineno}
