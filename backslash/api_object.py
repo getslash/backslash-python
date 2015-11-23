@@ -21,7 +21,9 @@ class APIObject(object):
             raise AttributeError(name)
 
     def refresh(self):
+        prev_id = self.id
         self._data = self._fetch()
+        assert self.id == prev_id
         return self
 
     def _fetch(self):
