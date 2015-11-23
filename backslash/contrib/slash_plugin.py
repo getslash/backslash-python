@@ -140,6 +140,11 @@ class BackslashPlugin(PluginInterface):
         return None
 
     def test_end(self):
+        details = {
+            'logfile': slash.context.result.get_log_path(),
+        }
+        details.update(slash.context.result.get_additional_details())
+        self.current_test.set_metadata_dict(details)
         self.current_test.report_end()
 
     def session_end(self):
