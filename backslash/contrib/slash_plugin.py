@@ -33,20 +33,23 @@ class BackslashPlugin(PluginInterface):
 
     current_test = session = None
 
-    def __init__(self, url, keepalive_interval=None):
+    def __init__(self, url=None, keepalive_interval=None):
         super(BackslashPlugin, self).__init__()
-        self._url = URL(url)
+        self._url = url
         self._repo_cache = {}
         self._file_hash_cache = {}
         self._keepalive_interval = keepalive_interval
         self._keepalive_thread = None
+
+    def _get_backslash_url(self):
+        return self._url
 
     def get_name(self):
         return 'backslash'
 
     def activate(self):
         self._runtoken = self._ensure_run_token()
-        self.client = BackslashClient(self._url, self._runtoken)
+        self.client = BackslashClient(URL(self._get_backslash_url()), self._runtoken)
 
     def session_start(self):
         try:
