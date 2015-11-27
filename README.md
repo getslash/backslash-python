@@ -1,10 +1,9 @@
 
-![Build Status] (https://secure.travis-ci.org/slash-testing/backslash-python.png )
+![Build Status] (https://secure.travis-ci.org/getslash/backslash-python.png )
 
+![Downloads] (https://img.shields.io/pypi/dm/backslash.svg )
 
-![Downloads] (https://pypip.in/d/backslash/badge.png )
-
-![Version] (https://pypip.in/v/backslash/badge.png )
+![Version] (https://img.shields.io/pypi/v/backslash.svg )
 
 Overview
 ========
