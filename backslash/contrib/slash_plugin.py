@@ -1,6 +1,7 @@
 from __future__ import print_function
 import hashlib
 import itertools
+import json
 import os
 import socket
 import sys
@@ -24,7 +25,7 @@ from ..utils import ensure_dir
 from .utils import normalize_file_path
 
 
-_SLASH_TOKEN_FILE = os.path.expanduser('~/.backslash/run_token')
+_CONFIG_FILE = os.path.expanduser('~/.backslash/config.json')
 
 _logger = logbook.Logger(__name__)
 
@@ -191,20 +192,39 @@ class BackslashPlugin(PluginInterface):
 
     #### Token Setup #########
     def _ensure_run_token(self):
-        if os.path.isfile(_SLASH_TOKEN_FILE):
-            with open(_SLASH_TOKEN_FILE) as f:
-                token = f.read().strip()
-        else:
-            token = self._fetch_token()
-            ensure_dir(os.path.dirname(_SLASH_TOKEN_FILE))
-            with open(_SLASH_TOKEN_FILE, 'w') as f:
-                f.write(token)
 
-        return token
+        tokens = self._get_existing_tokens()
+
+        returned = tokens.get(self._get_backslash_url())
+        if returned is None:
+            returned = self._fetch_token()
+            self._save_token(returned)
+
+        return returned
+
+    def _get_existing_tokens(self):
+        return self._get_config().get('run_tokens', {})
+
+    def _get_config(self):
+        if not os.path.isfile(_CONFIG_FILE):
+            return {}
+        with open(_CONFIG_FILE) as f:
+            return json.load(f)
+
+    def _save_token(self, token):
+        tmp_filename = _CONFIG_FILE + '.tmp'
+        cfg = self._get_config()
+        cfg.setdefault('run_tokens', {})[self._get_backslash_url()] = token
+
+        ensure_dir(os.path.dirname(tmp_filename))
+
+        with open(tmp_filename, 'w') as f:
+            json.dump(cfg, f, indent=' ')
+        os.rename(tmp_filename, _CONFIG_FILE)
 
     def _fetch_token(self):
         opened_browser = False
-        url = self._url.add_path('/runtoken/request/new')
+        url = URL(self._get_backslash_url()).add_path('/runtoken/request/new')
         for retry in itertools.count():
             resp = requests.get(url)
             resp.raise_for_status()
@@ -225,4 +245,3 @@ class BackslashPlugin(PluginInterface):
         if 'linux' in sys.platform and os.environ.get('DISPLAY') is None:
             return False # can't start browser
         return webbrowser.open_new(url)
-
