@@ -219,7 +219,7 @@ class BackslashPlugin(PluginInterface):
         ensure_dir(os.path.dirname(tmp_filename))
 
         with open(tmp_filename, 'w') as f:
-            json.dump(cfg, f, indent=' ')
+            json.dump(cfg, f, indent=2)
         os.rename(tmp_filename, _CONFIG_FILE)
 
     def _fetch_token(self):
