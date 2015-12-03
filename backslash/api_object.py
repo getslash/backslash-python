@@ -31,3 +31,9 @@ class APIObject(object):
 
     def __repr__(self):
         return '<API:{data[type]}:{data[id]}>'.format(data=self._data)
+
+    def without_fields(self, field_names):
+        new_data = dict((field_name, field_value)
+                        for field_name, field_value in self._data.items()
+                        if field_name not in field_names)
+        return type(self)(self.client, new_data)
