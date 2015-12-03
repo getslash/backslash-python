@@ -3,12 +3,13 @@ from sentinels import NOTHING
 from .api_object import APIObject
 from .commentable import Commentable
 from .error_container import ErrorContainer
+from .related_entity_container import RelatedEntityContainer
 from .warning_container import WarningContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
 
 
-class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commentable):
+class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commentable, RelatedEntityContainer):
 
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_test_end', {'id': self.id, 'duration': duration})
