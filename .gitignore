@@ -8,3 +8,4 @@ dist
 .env
 .coverage
 htmlcov
+.cache
