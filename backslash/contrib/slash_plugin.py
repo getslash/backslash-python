@@ -102,6 +102,8 @@ class BackslashPlugin(PluginInterface):
                 'class_name': test.__slash__.class_name,
                 'name': test.__slash__.function_name,
                 }
+        if getattr(test.__slash__, 'variation', None) is not None:
+            returned['variation'] = dict((name, str(value)) for name, value in test.__slash__.variation.items())
         self._update_scm_info(returned)
         return returned
 
