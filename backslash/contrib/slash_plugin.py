@@ -162,7 +162,7 @@ class BackslashPlugin(PluginInterface):
             _logger.error('Exception ignored in session_end', exc_info=True)
 
     def error_added(self, result, error):
-        kwargs = {'message': str(error.exception),
+        kwargs = {'message': str(error.exception) if not error.message else error.message,
                   'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
                   'traceback': error.traceback.to_list()}
 
