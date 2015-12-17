@@ -15,8 +15,10 @@ PY2 = sys.version_info[0] == 2
 
 if PY2:
     from cStringIO import StringIO as cStringIO
+    from pipes import quote as shellquote
 else:
     from io import StringIO as cStringIO
+    from shlex import quote as shellquote
 
 if PY2:
     import __builtin__ as _builtins

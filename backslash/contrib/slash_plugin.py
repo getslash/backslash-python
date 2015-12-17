@@ -19,7 +19,7 @@ import slash
 from slash.plugins import PluginInterface
 
 from sentinels import NOTHING
-
+from .._compat import shellquote
 from ..client import Backslash as BackslashClient, ParamsTooLarge
 from ..utils import ensure_dir
 from .utils import normalize_file_path
@@ -76,7 +76,7 @@ class BackslashPlugin(PluginInterface):
 
     def _get_slash_metadata(self):
         return {
-            'commandline': ' '.join(sys.argv),
+            'commandline': ' '.join(shellquote(arg) for arg in sys.argv),
         }
 
     def test_start(self):
