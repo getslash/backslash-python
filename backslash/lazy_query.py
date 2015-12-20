@@ -26,6 +26,9 @@ class LazyQuery(object):
         self._page_size = page_size
         self._typename = None
 
+    def all(self):
+        return list(self)
+
     def filter(self, *filter_objects, **fields):
         returned_url = self._url
         for filter_object in filter_objects:
