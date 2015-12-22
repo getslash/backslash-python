@@ -96,6 +96,9 @@ class Backslash(object):
         """
         return LazyQuery(self, '/rest/tests')
 
+    def query(self, path, **kwargs):
+        return LazyQuery(self, path, **kwargs)
+
 class API(object):
 
     def __init__(self, client, url, runtoken):
@@ -138,6 +141,7 @@ class API(object):
             return resp.json()
         else:
             return self._normalize_return_value(resp)
+
 
     def _normalize_return_value(self, response):
         json = response.json()
