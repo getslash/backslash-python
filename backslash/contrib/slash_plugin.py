@@ -149,7 +149,11 @@ class BackslashPlugin(PluginInterface):
         details = {
             'logfile': slash.context.result.get_log_path(),
         }
-        details.update(slash.context.result.get_additional_details())
+        if hasattr(slash.context.result, 'details'):
+            additional = slash.context.result.details.all()
+        else:
+            additional = slash.context.result.get_additional_details()
+        details.update(additional)
         self.current_test.set_metadata_dict(details)
         self.current_test.report_end()
 
