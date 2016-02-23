@@ -59,6 +59,7 @@ class BackslashPlugin(PluginInterface):
                 total_num_tests=slash.context.session.get_total_num_tests(),
                 hostname=socket.getfqdn(),
                 keepalive_interval=self._keepalive_interval,
+                infrastructure='slash',
                 metadata={
                     'slash': self._get_slash_metadata(),
                 },

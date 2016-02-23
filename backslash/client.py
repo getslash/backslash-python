@@ -66,6 +66,7 @@ class Backslash(object):
                              metadata=NOTHING,
                              keepalive_interval=NOTHING,
                              subjects=NOTHING,
+                             infrastructure=NOTHING,
     ):
         """Reports a new session starting
 
@@ -79,6 +80,7 @@ class Backslash(object):
             'metadata': metadata,
             'keepalive_interval': keepalive_interval,
             'subjects': subjects,
+            'infrastructure': infrastructure,
         })
         return returned
 
