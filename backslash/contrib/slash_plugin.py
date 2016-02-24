@@ -53,6 +53,7 @@ class BackslashPlugin(PluginInterface):
         self.client = BackslashClient(URL(self._get_backslash_url()), self._runtoken)
 
     def session_start(self):
+        metadata = self._get_initial_session_metadata()
         try:
             self.session = self.client.report_session_start(
                 logical_id=slash.context.session.id,
@@ -60,9 +61,7 @@ class BackslashPlugin(PluginInterface):
                 hostname=socket.getfqdn(),
                 keepalive_interval=self._keepalive_interval,
                 infrastructure='slash',
-                metadata={
-                    'slash': self._get_slash_metadata(),
-                },
+                metadata=metadata,
                 **self._get_extra_session_start_kwargs()
             )
         except Exception: # pylint: disable=broad-except
@@ -72,11 +71,15 @@ class BackslashPlugin(PluginInterface):
             self._keepalive_thread = KeepaliveThread(self.client, self.session, self._keepalive_interval)
             self._keepalive_thread.start()
 
+    def _get_initial_session_metadata(self):
+        return {'slash': self._get_slash_metadata()}
+
     def _get_extra_session_start_kwargs(self):
         return {}
 
     def _get_slash_metadata(self):
         return {
+            'version': slash.__version__,
             'commandline': ' '.join(shellquote(arg) for arg in sys.argv),
         }
 
