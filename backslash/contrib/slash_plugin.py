@@ -120,7 +120,12 @@ class BackslashPlugin(PluginInterface):
         if repo is None:
             return
         test_info['scm'] = 'git'
-        test_info['scm_revision'] = repo.head.commit.hexsha
+        try:
+            hexsha = repo.head.commit.hexsha
+        except Exception: # pylint: disable=broad-except
+            _logger.debug('Unable to get commit hash', exc_info=True)
+            hexsha = None
+        test_info['scm_revision'] = hexsha
         test_info['scm_dirty'] = bool(repo.untracked_files or repo.index.diff(None) or repo.index.diff(repo.head.commit))
 
     def _calculate_file_hash(self, filename):
