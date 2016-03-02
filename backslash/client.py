@@ -137,7 +137,7 @@ class API(object):
                 time.sleep(random.randrange(*sleep_range))
 
     def get(self, path, raw=False):
-        resp = requests.get(self.url.add_path(path))
+        resp = self.session.get(self.url.add_path(path))
         raise_for_status(resp)
         if raw:
             return resp.json()
