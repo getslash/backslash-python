@@ -29,6 +29,8 @@ _CONFIG_FILE = os.path.expanduser('~/.backslash/config.json')
 
 _logger = logbook.Logger(__name__)
 
+_PWD = os.path.abspath('.')
+
 
 class BackslashPlugin(PluginInterface):
 
@@ -148,6 +150,8 @@ class BackslashPlugin(PluginInterface):
         return returned
 
     def _get_git_repo(self, dirname):
+        if not os.path.isabs(dirname):
+            dirname = os.path.abspath(os.path.join(_PWD, dirname))
         while dirname != '/':
             if os.path.isdir(os.path.join(dirname, '.git')):
                 return git.Repo(dirname)
