@@ -209,6 +209,14 @@ class BackslashPlugin(PluginInterface):
             warning_obj.add_warning(**kwargs)
 
 
+    def exception_caught_before_debugger(self, **_):
+        if self.session is not None and slash.config.root.debug.enabled:
+            self.session.report_in_pdb()
+
+    def exception_caught_after_debugger(self, **_):
+        if self.session is not None and slash.config.root.debug.enabled:
+            self.session.report_not_in_pdb()
+
     #### Token Setup #########
     def _ensure_run_token(self):
 
