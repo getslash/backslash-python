@@ -1,5 +1,6 @@
 from sentinels import NOTHING
 
+from .contrib.utils import normalize_file_path
 from .lazy_query import LazyQuery
 
 
@@ -10,7 +11,7 @@ class WarningContainer(object):
         return self.client.api.call_function('add_warning', {self._get_id_key(): self.id,
                                                            'message': message,
                                                            'lineno': lineno,
-                                                           'filename': filename,
+                                                           'filename': normalize_file_path(filename),
                                                            'timestamp': timestamp,
                                                        })
 
