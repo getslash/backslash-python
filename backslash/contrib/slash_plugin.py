@@ -1,35 +1,49 @@
 from __future__ import print_function
+
+import functools
 import hashlib
 import itertools
 import json
 import os
 import socket
 import sys
-from .keepalive_thread import KeepaliveThread
 import time
 import webbrowser
 
-import git
 import logbook
-
 import requests
+
+import git
+import slash
+from sentinels import NOTHING
+from slash.plugins import PluginInterface
 from urlobject import URLObject as URL
 
-import slash
-from slash.plugins import PluginInterface
-
-from sentinels import NOTHING
 from .._compat import shellquote
-from ..client import Backslash as BackslashClient, ParamsTooLarge
+from ..client import Backslash as BackslashClient
+from ..client import ParamsTooLarge
 from ..utils import ensure_dir
+from .keepalive_thread import KeepaliveThread
 from .utils import normalize_file_path
-
 
 _CONFIG_FILE = os.path.expanduser('~/.backslash/config.json')
 
 _logger = logbook.Logger(__name__)
 
 _PWD = os.path.abspath('.')
+
+
+def handle_exceptions(func):
+
+    @functools.wraps(func)
+    def new_func(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except Exception: # pylint: disable=broad-except
+            exc_info = sys.exc_info()
+            if not self._handle_exception(exc_info): # pylint: disable=protected-access
+                raise
+    return new_func
 
 
 class BackslashPlugin(PluginInterface):
@@ -44,16 +58,22 @@ class BackslashPlugin(PluginInterface):
         self._keepalive_interval = keepalive_interval
         self._keepalive_thread = None
 
+
+    def _handle_exception(self, exc_info):
+        pass
+
     def _get_backslash_url(self):
         return self._url
 
     def get_name(self):
         return 'backslash'
 
+    @handle_exceptions
     def activate(self):
         self._runtoken = self._ensure_run_token()
         self.client = BackslashClient(URL(self._get_backslash_url()), self._runtoken)
 
+    @handle_exceptions
     def session_start(self):
         metadata = self._get_initial_session_metadata()
         try:
@@ -85,12 +105,14 @@ class BackslashPlugin(PluginInterface):
             'commandline': ' '.join(shellquote(arg) for arg in sys.argv),
         }
 
+    @handle_exceptions
     def test_start(self):
         self.current_test = self.session.report_test_start(
             test_logical_id=slash.context.test.__slash__.id,
             **self._get_test_info(slash.context.test)
         )
 
+    @handle_exceptions
     def test_skip(self, reason=None):
         self.current_test.mark_skipped(reason=reason)
 
@@ -158,6 +180,7 @@ class BackslashPlugin(PluginInterface):
             dirname = os.path.normpath(os.path.abspath(os.path.join(dirname, '..')))
         return None
 
+    @handle_exceptions
     def test_end(self):
         details = {
             'logfile': slash.context.result.get_log_path(),
@@ -170,6 +193,7 @@ class BackslashPlugin(PluginInterface):
         self.current_test.set_metadata_dict(details)
         self.current_test.report_end()
 
+    @handle_exceptions
     def session_end(self):
         try:
             if self._keepalive_thread is not None:
@@ -178,6 +202,7 @@ class BackslashPlugin(PluginInterface):
         except Exception:
             _logger.error('Exception ignored in session_end', exc_info=True)
 
+    @handle_exceptions
     def error_added(self, result, error):
         kwargs = {'message': str(error.exception) if not error.message else error.message,
                   'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
@@ -202,17 +227,19 @@ class BackslashPlugin(PluginInterface):
             else:
                 break
 
+    @handle_exceptions
     def warning_added(self, warning):
         kwargs = {'message': warning.message, 'filename': warning.filename, 'lineno': warning.lineno}
         warning_obj = self.current_test if self.current_test is not None else self.session
         if warning_obj is not None:
             warning_obj.add_warning(**kwargs)
 
-
+    @handle_exceptions
     def exception_caught_before_debugger(self, **_):
         if self.session is not None and slash.config.root.debug.enabled:
             self.session.report_in_pdb()
 
+    @handle_exceptions
     def exception_caught_after_debugger(self, **_):
         if self.session is not None and slash.config.root.debug.enabled:
             self.session.report_not_in_pdb()
