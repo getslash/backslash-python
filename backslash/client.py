@@ -136,8 +136,8 @@ class API(object):
             if time.time() < end_time:
                 time.sleep(random.randrange(*sleep_range))
 
-    def get(self, path, raw=False):
-        resp = self.session.get(self.url.add_path(path))
+    def get(self, path, raw=False, params=None):
+        resp = self.session.get(self.url.add_path(path), params=params)
         raise_for_status(resp)
         if raw:
             return resp.json()
