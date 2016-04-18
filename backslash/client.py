@@ -114,7 +114,6 @@ class API(object):
 
     def call_function(self, name, params=None):
         for _ in self._iter_retries():
-            _logger.trace('API: {0} {1}', name, params)
             resp = self.session.post(
                 self.url.add_path('api').add_path(name),
                 data=self._serialize_params(params),
@@ -179,3 +178,4 @@ class API(object):
         if len(returned) > _MAX_PARAMS_SIZE:
             raise ParamsTooLarge()
         return returned
+
