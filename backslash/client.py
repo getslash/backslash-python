@@ -121,8 +121,11 @@ class API(object):
 
         for _ in self._iter_retries():
 
-            resp = self.session.post(
-                self.url.add_path('api').add_path(name), data=data, headers=headers)
+            try:
+                resp = self.session.post(
+                    self.url.add_path('api').add_path(name), data=data, headers=headers)
+            except (requests.ConnectionError,):
+                continue
 
             if resp.status_code not in _RETRY_STATUS_CODES:
                 break
