@@ -136,21 +136,24 @@ class BackslashPlugin(PluginInterface):
         return returned
 
     def _update_scm_info(self, test_info):
-        test_info['file_hash'] = self._calculate_file_hash(test_info['file_name'])
-        dirname = os.path.dirname(test_info['file_name'])
-        repo = self._repo_cache.get(dirname, NOTHING)
-        if repo is NOTHING:
-            repo = self._repo_cache[dirname] = self._get_git_repo(dirname)
-        if repo is None:
-            return
-        test_info['scm'] = 'git'
         try:
-            hexsha = repo.head.commit.hexsha
+            test_info['file_hash'] = self._calculate_file_hash(test_info['file_name'])
+            dirname = os.path.dirname(test_info['file_name'])
+            repo = self._repo_cache.get(dirname, NOTHING)
+            if repo is NOTHING:
+                repo = self._repo_cache[dirname] = self._get_git_repo(dirname)
+            if repo is None:
+                return
+            test_info['scm'] = 'git'
+            try:
+                hexsha = repo.head.commit.hexsha
+            except Exception: # pylint: disable=broad-except
+                _logger.debug('Unable to get commit hash', exc_info=True)
+                hexsha = None
+            test_info['scm_revision'] = hexsha
+            test_info['scm_dirty'] = bool(repo.untracked_files or repo.index.diff(None) or repo.index.diff(repo.head.commit))
         except Exception: # pylint: disable=broad-except
-            _logger.debug('Unable to get commit hash', exc_info=True)
-            hexsha = None
-        test_info['scm_revision'] = hexsha
-        test_info['scm_dirty'] = bool(repo.untracked_files or repo.index.diff(None) or repo.index.diff(repo.head.commit))
+            _logger.warning('Error when obtaining SCM information', exc_info=True)
 
     def _calculate_file_hash(self, filename):
         returned = self._file_hash_cache.get(filename)
