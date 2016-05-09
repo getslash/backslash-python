@@ -10,14 +10,22 @@
 #pylint: disable=unused-import
 #pylint: disable=exec-used
 import sys
+from contextlib import contextmanager
 
 PY2 = sys.version_info[0] == 2
 
 if PY2:
     from cStringIO import StringIO as cStringIO
+    from cStringIO import StringIO as BytesIO
     from pipes import quote as shellquote
+
+    @contextmanager
+    def TextIOWrapper(f):
+        yield f
+
 else:
     from io import StringIO as cStringIO
+    from io import BytesIO, TextIOWrapper
     from shlex import quote as shellquote
 
 if PY2:
@@ -69,5 +77,3 @@ else:
         if value.__traceback__ is not tb:
             raise value.with_traceback(tb)
         raise value
-
-

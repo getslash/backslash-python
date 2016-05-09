@@ -1,5 +1,5 @@
 # pylint: disable=no-member
-
+import gzip
 import json
 import random
 import time
@@ -10,7 +10,7 @@ import requests
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
-from ._compat import iteritems
+from ._compat import iteritems, BytesIO, TextIOWrapper
 from .comment import Comment
 from .error import Error
 from .lazy_query import LazyQuery
@@ -35,7 +35,8 @@ _RETRY_STATUS_CODES = set([
 _logger = logbook.Logger(__name__)
 
 
-_MAX_PARAMS_SIZE = 1000000 # 1Mb
+_COMPRESS_THRESHOLD = 4 * 1024
+_MAX_PARAMS_SIZE = 1024 * 1024 # 1Mb
 
 class ParamsTooLarge(Exception):
     pass
@@ -113,14 +114,16 @@ class API(object):
             'X-Backslash-run-token': self.runtoken})
 
     def call_function(self, name, params=None):
+        is_compressed, data = self._serialize_params(params)
+        headers = {'Content-type': 'application/json'}
+        if is_compressed:
+            headers['Content-encoding'] = 'gzip'
+
         for _ in self._iter_retries():
+
             resp = self.session.post(
-                self.url.add_path('api').add_path(name),
-                data=self._serialize_params(params),
-                headers={
-                    'Content-type': 'application/json',
-                }
-            )
+                self.url.add_path('api').add_path(name), data=data, headers=headers)
+
             if resp.status_code not in _RETRY_STATUS_CODES:
                 break
         raise_for_status(resp)
@@ -174,8 +177,20 @@ class API(object):
             if param_value is NOTHING:
                 continue
             returned[param_name] = param_value
+        compressed = False
         returned = json.dumps(returned)
+        if len(returned) > _COMPRESS_THRESHOLD:
+            compressed = True
+            returned = self._compress(returned)
         if len(returned) > _MAX_PARAMS_SIZE:
             raise ParamsTooLarge()
-        return returned
+        return compressed, returned
 
+    def _compress(self, data):
+        s = BytesIO()
+
+        with gzip.GzipFile(fileobj=s, mode='wb') as f:
+            with TextIOWrapper(f) as w:
+                w.write(data)
+
+        return s.getvalue()
