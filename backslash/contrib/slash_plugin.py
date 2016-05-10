@@ -32,6 +32,8 @@ _logger = logbook.Logger(__name__)
 
 _PWD = os.path.abspath('.')
 
+_HAS_TEST_AVOIDED = (int(slash.__version__.split('.')[0]) >= 1)
+
 
 def handle_exceptions(func):
 
@@ -104,6 +106,13 @@ class BackslashPlugin(PluginInterface):
             'version': slash.__version__,
             'commandline': ' '.join(shellquote(arg) for arg in sys.argv),
         }
+
+    @slash.plugins.register_if(_HAS_TEST_AVOIDED)
+    @handle_exceptions
+    def test_avoided(self, reason):
+        self.test_start()
+        self.test_skip(reason=reason)
+        self.test_end()
 
     @handle_exceptions
     def test_start(self):
