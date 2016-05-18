@@ -38,7 +38,10 @@ _logger = logbook.Logger(__name__)
 _COMPRESS_THRESHOLD = 4 * 1024
 _MAX_PARAMS_SIZE = 1024 * 1024 # 1Mb
 
-class ParamsTooLarge(Exception):
+class BackslashClientException(Exception):
+    pass
+
+class ParamsTooLarge(BackslashClientException):
     pass
 
 
@@ -129,6 +132,9 @@ class API(object):
 
             if resp.status_code not in _RETRY_STATUS_CODES:
                 break
+        else:
+            raise BackslashClientException('Maximum number of retries exceeded for calling Backslash API')
+
         raise_for_status(resp)
 
         return self._normalize_return_value(resp)
