@@ -139,8 +139,13 @@ class BackslashPlugin(PluginInterface):
                 'class_name': test.__slash__.class_name,
                 'name': test.__slash__.function_name,
                 }
-        if getattr(test.__slash__, 'variation', None) is not None:
-            returned['variation'] = dict((name, str(value)) for name, value in test.__slash__.variation.items())
+        variation = getattr(test.__slash__, 'variation', None)
+        if variation:
+            if hasattr(test.__slash__.variation, 'id'):
+                items = test.__slash__.variation.id.items()
+            else:
+                items = test.__slash__.variation.items()
+            returned['variation'] = dict((name, str(value)) for name, value in items)
         self._update_scm_info(returned)
         return returned
 
