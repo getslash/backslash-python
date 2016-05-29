@@ -6,6 +6,7 @@ import time
 
 import logbook
 import requests
+from requests.exceptions import ConnectionError, ReadTimeout
 
 from sentinels import NOTHING
 from urlobject import URLObject as URL
@@ -127,7 +128,7 @@ class API(object):
             try:
                 resp = self.session.post(
                     self.url.add_path('api').add_path(name), data=data, headers=headers)
-            except (requests.ConnectionError,):
+            except (ConnectionError, ReadTimeout, ):
                 continue
 
             if resp.status_code not in _RETRY_STATUS_CODES:
