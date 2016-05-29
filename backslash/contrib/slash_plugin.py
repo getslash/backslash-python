@@ -134,10 +134,14 @@ class BackslashPlugin(PluginInterface):
                 'is_interactive': True
             }
         else:
+            test_display_name = test.__slash__.address
+            if set(test_display_name) & set('/.'):
+                test_display_name = test.__slash__.function_name
+
             returned = {
                 'file_name': normalize_file_path(test.__slash__.file_path),
                 'class_name': test.__slash__.class_name,
-                'name': test.__slash__.function_name,
+                'name': test_display_name,
                 }
         variation = getattr(test.__slash__, 'variation', None)
         if variation:
