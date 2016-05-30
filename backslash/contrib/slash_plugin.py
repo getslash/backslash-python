@@ -203,6 +203,9 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     def test_end(self):
+        if self.current_test is None:
+            return
+
         details = {
             'logfile': slash.context.result.get_log_path(),
         }
