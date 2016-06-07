@@ -106,6 +106,7 @@ class Backslash(object):
     def query(self, path, **kwargs):
         return LazyQuery(self, path, **kwargs)
 
+
 class API(object):
 
     def __init__(self, client, url, runtoken):
@@ -116,6 +117,7 @@ class API(object):
         self.session = requests.Session()
         self.session.headers.update({
             'X-Backslash-run-token': self.runtoken})
+        self.call = CallProxy(self)
 
     def call_function(self, name, params=None):
         is_compressed, data = self._serialize_params(params)
@@ -204,3 +206,20 @@ class API(object):
                 w.write(data)
 
         return s.getvalue()
+
+
+class CallProxy(object):
+
+    def __init__(self, api):
+        super(CallProxy, self).__init__()
+        self._api = api
+
+    def __getattr__(self, attr):
+        if attr.startswith('_'):
+            raise AttributeError(attr)
+
+        def new_func(**params):
+            return self._api.call_function(attr, params)
+
+        new_func.__name__ = attr
+        return new_func
