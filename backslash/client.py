@@ -165,10 +165,14 @@ class API(object):
         json = response.json()
         if json is None:
             return None
-        result = response.json().get('result')
+        result = json.get('result')
         if result is None:
+            if isinstance(json, dict):
+                for key, value in json.items():
+                    if isinstance(value, dict) and value.get('type') == key:
+                        return self.build_api_object(value)
             return json
-        if isinstance(result, dict) and 'type' in result:
+        elif isinstance(result, dict) and 'type' in result:
             return self.build_api_object(result)
         return result
 
