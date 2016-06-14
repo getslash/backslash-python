@@ -179,14 +179,14 @@ class API(object):
         return result
 
     def build_api_object(self, result):
-        return self._get_objtype(result)(self.client, result)
+        objtype = self._get_objtype(result)
+        if objtype is None:
+            return result
+        return objtype(self.client, result)
 
     def _get_objtype(self, json_object):
         typename = json_object['type']
-        returned = _TYPES_BY_TYPENAME.get(typename)
-        if returned is None:
-            raise NotImplementedError()  # pragma: no cover
-        return returned
+        return _TYPES_BY_TYPENAME.get(typename)
 
     def _serialize_params(self, params):
         if params is None:

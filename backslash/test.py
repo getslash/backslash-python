@@ -32,5 +32,4 @@ class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commenta
         return LazyQuery(self.client, '/rest/errors', query_params={'test_id': self.id})
 
     def get_session(self):
-        return self.client.api.build_api_object(
-            self.client.api.get('/rest/sessions/{0}'.format(self.session_id))['session'])
+        return self.client.api.get('/rest/sessions/{0}'.format(self.session_id))
