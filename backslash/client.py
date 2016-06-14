@@ -18,6 +18,7 @@ from .lazy_query import LazyQuery
 from .session import Session
 from .suite import Suite
 from .test import Test
+from .user import User
 from .utils import raise_for_status
 from .warning import Warning
 
@@ -28,6 +29,7 @@ _TYPES_BY_TYPENAME = {
     'warning': Warning,
     'comment': Comment,
     'suite': Suite,
+    'user': User,
 }
 
 _RETRY_STATUS_CODES = set([
