@@ -5,6 +5,7 @@ import random
 import time
 
 import logbook
+from munch import munchify
 import requests
 from requests.exceptions import ConnectionError, ReadTimeout
 
@@ -122,6 +123,15 @@ class API(object):
         self.session.headers.update({
             'X-Backslash-run-token': self.runtoken})
         self.call = CallProxy(self)
+
+    def info(self):
+        """Inspects the remote API and returns information about its capabilities
+        """
+        resp = self.session.options(self.url.add_path('api'))
+        resp.raise_for_status()
+        info = resp.json()
+        return munchify(info)
+
 
     def call_function(self, name, params=None):
         is_compressed, data = self._serialize_params(params)
