@@ -21,7 +21,7 @@ from urlobject import URLObject as URL
 
 from .._compat import shellquote
 from ..client import Backslash as BackslashClient
-from ..client import ParamsTooLarge
+from ..exceptions import ParamsTooLarge
 from ..utils import ensure_dir
 from .keepalive_thread import KeepaliveThread
 from .utils import normalize_file_path

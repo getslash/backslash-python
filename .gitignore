@@ -9,3 +9,4 @@ dist
 .coverage
 htmlcov
 .cache
+flycheck_*
