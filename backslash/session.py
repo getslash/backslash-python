@@ -19,10 +19,10 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def send_keepalive(self):
         self.client.api.call_function('send_keepalive', {'session_id': self.id})
 
-    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING, file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING, is_interactive=NOTHING, variation=NOTHING):
-        return self.client.api.call_function(
-            'report_test_start',
-            {'session_id': self.id,
+    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING, file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING, is_interactive=NOTHING, variation=NOTHING, metadata=NOTHING):
+
+
+        params = {'session_id': self.id,
              'name': name,
              'scm': scm,
              'file_hash': file_hash,
@@ -32,7 +32,22 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
              'file_name': file_name,
              'is_interactive': is_interactive,
              'variation': variation,
-             'test_logical_id': test_logical_id})
+             'test_logical_id': test_logical_id}
+
+        if metadata is not NOTHING:
+            supports_inline_metadata = (self.client.api.info().endpoints.report_test_start.version >= 2)
+
+            if supports_inline_metadata:
+                params['metadata'] = metadata
+
+        returned = self.client.api.call_function(
+            'report_test_start', params
+        )
+
+        if metadata is not NOTHING and not supports_inline_metadata:
+            returned.set_metadata_dict(metadata)
+
+        return returned
 
 
     def report_in_pdb(self):
