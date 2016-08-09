@@ -1,3 +1,4 @@
+import copy
 import gzip
 import json
 import random
@@ -52,14 +53,16 @@ class API(object):
         self.session.headers.update({
             'X-Backslash-run-token': self.runtoken})
         self.call = CallProxy(self)
+        self._cached_info = None
 
     def info(self):
         """Inspects the remote API and returns information about its capabilities
         """
-        resp = self.session.options(self.url.add_path('api'))
-        resp.raise_for_status()
-        info = resp.json()
-        return munchify(info)
+        if self._cached_info is None:
+            resp = self.session.options(self.url.add_path('api'))
+            resp.raise_for_status()
+            self._cached_info = munchify(resp.json())
+        return copy.deepcopy(self._cached_info)
 
     def call_function(self, name, params=None):
         is_compressed, data = self._serialize_params(params)
