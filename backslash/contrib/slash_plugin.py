@@ -96,16 +96,13 @@ class BackslashPlugin(PluginInterface):
             self._keepalive_thread.start()
 
     def _get_initial_session_metadata(self):
-        return {'slash': self._get_slash_metadata()}
+        return {
+            'slash::version': slash.__version__,
+            'slash::commandline': ' '.join(shellquote(arg) for arg in sys.argv),
+        }
 
     def _get_extra_session_start_kwargs(self):
         return {}
-
-    def _get_slash_metadata(self):
-        return {
-            'version': slash.__version__,
-            'commandline': ' '.join(shellquote(arg) for arg in sys.argv),
-        }
 
     @slash.plugins.register_if(_HAS_TEST_AVOIDED)
     @handle_exceptions
