@@ -113,9 +113,22 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     def test_start(self):
+        kwargs = self._get_test_info(slash.context.test)
+
+        tags = slash.context.test.__slash__.tags
+        tag_dict = {tag_name: tags[tag_name] for tag_name in tags}
+
+        if tag_dict:
+            kwargs['metadata'] = {
+                'slash::tags': {
+                    'values': {tag_name: tag_value for tag_name, tag_value in tag_dict.items() if tag_value is not NOTHING},
+                    'names': list(tag_dict),
+                },
+            }
+
         self.current_test = self.session.report_test_start(
             test_logical_id=slash.context.test.__slash__.id,
-            **self._get_test_info(slash.context.test)
+            **kwargs
         )
 
     @handle_exceptions
