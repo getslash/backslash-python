@@ -59,6 +59,7 @@ class BackslashPlugin(PluginInterface):
         self._file_hash_cache = {}
         self._keepalive_interval = keepalive_interval
         self._keepalive_thread = None
+        self._error_containers = {}
 
 
     def _handle_exception(self, exc_info):
@@ -114,7 +115,6 @@ class BackslashPlugin(PluginInterface):
     @handle_exceptions
     def test_start(self):
         kwargs = self._get_test_info(slash.context.test)
-
         tags = slash.context.test.__slash__.tags
         tag_dict = {tag_name: tags[tag_name] for tag_name in tags}
 
@@ -130,6 +130,7 @@ class BackslashPlugin(PluginInterface):
             test_logical_id=slash.context.test.__slash__.id,
             **kwargs
         )
+        self._error_containers[slash.context.test.__slash__.id] = self.current_test
 
     @handle_exceptions
     def test_skip(self, reason=None):
@@ -233,11 +234,20 @@ class BackslashPlugin(PluginInterface):
             if self._keepalive_thread is not None:
                 self._keepalive_thread.stop()
             self.session.report_end()
-        except Exception:
+        except Exception:       # pylint: disable=broad-except
             _logger.error('Exception ignored in session_end', exc_info=True)
 
     @handle_exceptions
     def error_added(self, result, error):
+        if result is slash.session.results.global_result:
+            error_container = self.session
+        else:
+            error_container = self._error_containers.get(result.test_metadata.id, self.current_test)
+
+        if error_container is None:
+            _logger.error('Could not determine error container to report on for {}', result)
+            return
+
         kwargs = {'message': str(error.exception) if not error.message else error.message,
                   'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
                   'traceback': error.traceback.to_list()}
@@ -248,12 +258,7 @@ class BackslashPlugin(PluginInterface):
                     frame['globals'] = None
                     frame['locals'] = None
             try:
-                if result is slash.session.results.global_result:
-                    if self.session is not None:
-                        self.session.add_error(**kwargs)
-                elif self.current_test is not None:
-                    if self.current_test is not None:
-                        self.current_test.add_error(**kwargs)
+                error_container.add_error(**kwargs)
             except ParamsTooLarge:
                 if compact_variables:
                     raise
