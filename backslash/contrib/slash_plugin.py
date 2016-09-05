@@ -26,6 +26,8 @@ from ..utils import ensure_dir
 from .keepalive_thread import KeepaliveThread
 from .utils import normalize_file_path
 
+from ..__version__ import __version__ as BACKSLASH_CLIENT_VERSION
+
 _CONFIG_FILE = os.path.expanduser('~/.backslash/config.json')
 
 _logger = logbook.Logger(__name__)
@@ -100,6 +102,8 @@ class BackslashPlugin(PluginInterface):
         return {
             'slash::version': slash.__version__,
             'slash::commandline': ' '.join(shellquote(arg) for arg in sys.argv),
+            'backslash_client_version': BACKSLASH_CLIENT_VERSION,
+            'python_version': '.'.join(map(str, sys.version_info[:3])),
         }
 
     def _get_extra_session_start_kwargs(self):
