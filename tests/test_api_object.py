@@ -1,6 +1,8 @@
+from uuid import uuid4
 import pytest
 from backslash import Backslash
 from backslash.api_object import APIObject
+from backslash import test, session
 
 
 def test_api_object_equality(client, data1):
@@ -24,10 +26,30 @@ def test_api_object_not_equal_different_data(client, data1, data2):
     assert not a == b
     assert a != b
 
-def test_object_url(client):
+def test_object_api_url(client):
     data = {'api_path': '/rest/objects/1'}
     obj = APIObject(client, data)
-    assert obj.url == 'http://127.0.0.1:12345/rest/objects/1'
+    assert obj.api_url == 'http://127.0.0.1:12345/rest/objects/1'
+
+def test_object_ui_url(client):
+    obj = APIObject(client, {})
+    with pytest.raises(NotImplementedError):
+        obj.ui_url
+
+@pytest.mark.parametrize('object_type', [test.Test, session.Session])
+@pytest.mark.parametrize('use_logical', [True, False])
+def test_ui_url(client, object_type, logical_id, use_logical):
+    id = 1002
+    obj = object_type(client, {'id': id, 'logical_id': logical_id if use_logical else None})
+    url = obj.ui_url
+    assert url == client.url + '#/{}s/{}'.format(
+        object_type.__name__.lower(),
+        logical_id if use_logical else id)
+
+
+@pytest.fixture
+def logical_id():
+    return str(uuid4())
 
 @pytest.fixture
 def client():

@@ -7,8 +7,12 @@ class APIObject(object):
         self._data = json_data
 
     @property
-    def url(self):
+    def api_url(self):
         return self.client.url.add_path(self.api_path)
+
+    @property
+    def ui_url(self):
+        raise NotImplementedError() # pragma: no cover
 
     def __eq__(self, other):
         if not isinstance(other, APIObject):

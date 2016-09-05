@@ -13,6 +13,10 @@ from .metadata_holder import MetadataHolder
 
 class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archiveable, Commentable, RelatedEntityContainer):
 
+    @property
+    def ui_url(self):
+        return self.client.url + '#/sessions/{}'.format(self.logical_id or self.id)
+
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_session_end', {'id': self.id, 'duration': duration})
 
