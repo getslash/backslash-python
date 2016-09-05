@@ -1,4 +1,5 @@
 import pytest
+from backslash import Backslash
 from backslash.api_object import APIObject
 
 
@@ -23,9 +24,15 @@ def test_api_object_not_equal_different_data(client, data1, data2):
     assert not a == b
     assert a != b
 
+def test_object_url(client):
+    data = {'api_path': '/rest/objects/1'}
+    obj = APIObject(client, data)
+    assert obj.url == 'http://127.0.0.1:12345/rest/objects/1'
+
 @pytest.fixture
 def client():
-    return object()
+    return Backslash('http://127.0.0.1:12345', runtoken=None)
+
 
 
 @pytest.fixture

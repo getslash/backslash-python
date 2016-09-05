@@ -6,6 +6,10 @@ class APIObject(object):
         self.client = client
         self._data = json_data
 
+    @property
+    def url(self):
+        return self.client.url.add_path(self.api_path)
+
     def __eq__(self, other):
         if not isinstance(other, APIObject):
             return NotImplemented

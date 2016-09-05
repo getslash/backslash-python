@@ -22,6 +22,10 @@ class Backslash(object):
         self._url = URL(url)
         self.api = API(self, url, runtoken)
 
+    @property
+    def url(self):
+        return self._url
+
     def toggle_user_role(self, user_id, role):
         return self.api.call_function('toggle_user_role', {'user_id': user_id, 'role': role})
 
