@@ -231,6 +231,7 @@ class BackslashPlugin(PluginInterface):
         details.update(additional)
         self.current_test.set_metadata_dict(details)
         self.current_test.report_end()
+        self.current_test = None
 
     @handle_exceptions
     def session_end(self):
