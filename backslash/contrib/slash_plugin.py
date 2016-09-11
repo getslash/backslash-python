@@ -104,6 +104,7 @@ class BackslashPlugin(PluginInterface):
             'slash::commandline': ' '.join(shellquote(arg) for arg in sys.argv),
             'backslash_client_version': BACKSLASH_CLIENT_VERSION,
             'python_version': '.'.join(map(str, sys.version_info[:3])),
+            'process_id': os.getpid(),
         }
 
     def _get_extra_session_start_kwargs(self):
