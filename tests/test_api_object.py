@@ -40,11 +40,17 @@ def test_object_ui_url(client):
 @pytest.mark.parametrize('use_logical', [True, False])
 def test_ui_url(client, object_type, logical_id, use_logical):
     id = 1002
-    obj = object_type(client, {'id': id, 'logical_id': logical_id if use_logical else None})
+    data = {'id': id, 'logical_id': logical_id if use_logical else None}
+    if object_type is test.Test:
+        data['session_display_id'] = str(uuid4())
+    obj = object_type(client, data)
+
     url = obj.ui_url
-    assert url == client.url + '#/{}s/{}'.format(
-        object_type.__name__.lower(),
-        logical_id if use_logical else id)
+    display_id = logical_id if use_logical else id
+    if object_type is test.Test:
+        assert url == client.url + '#/sessions/{}/tests/{}'.format(data['session_display_id'], display_id)
+    else:
+        assert url == client.url + '#/{}s/{}'.format(object_type.__name__.lower(), display_id)
 
 
 @pytest.fixture
