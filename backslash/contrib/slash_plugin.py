@@ -16,7 +16,9 @@ import requests
 import git
 import slash
 from sentinels import NOTHING
+from slash import config as slash_config
 from slash.plugins import PluginInterface
+from slash.utils.conf_utils import Cmdline, Doc
 from urlobject import URLObject as URL
 
 from .._compat import shellquote
@@ -73,6 +75,12 @@ class BackslashPlugin(PluginInterface):
     def get_name(self):
         return 'backslash'
 
+    def get_config(self):
+        return {
+            "session_labels": [] // Doc('Specify labels to be added to the session when reported') // Cmdline(append="--session-label", metavar="LABEL"),
+        }
+
+
     @handle_exceptions
     def activate(self):
         self._runtoken = self._ensure_run_token()
@@ -93,6 +101,9 @@ class BackslashPlugin(PluginInterface):
             )
         except Exception: # pylint: disable=broad-except
             raise
+
+        for label in slash_config.root.plugin_config.backslash.session_labels:
+            self.client.api.call.add_label(session_id=self.session.id, label=label)
 
         if self._keepalive_interval is not None:
             self._keepalive_thread = KeepaliveThread(self.client, self.session, self._keepalive_interval)
