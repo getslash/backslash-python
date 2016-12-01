@@ -234,7 +234,7 @@ class BackslashPlugin(PluginInterface):
             return
 
         details = {
-            'logfile': os.path.abspath(slash.context.result.get_log_path()),
+            'local_log_path': os.path.abspath(slash.context.result.get_log_path()),
         }
         if hasattr(slash.context.result, 'details'):
             additional = slash.context.result.details.all()
