@@ -60,7 +60,7 @@ class API(object):
         """
         if self._cached_info is None:
             resp = self.session.options(self.url.add_path('api'))
-            resp.raise_for_status()
+            raise_for_status(resp)
             self._cached_info = munchify(resp.json())
         return copy.deepcopy(self._cached_info)
 

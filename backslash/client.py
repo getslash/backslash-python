@@ -48,7 +48,7 @@ class Backslash(object):
 
         :rtype: A session object representing the reported session
         """
-        returned = self.api.call_function('report_session_start', {
+        returned = self.api.call_function('report_session_startt', {
             'hostname': hostname,
             'logical_id': logical_id,
             'total_num_tests': total_num_tests,
