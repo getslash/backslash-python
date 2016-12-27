@@ -104,6 +104,11 @@ class API(object):
         else:
             return self._normalize_return_value(resp)
 
+    def delete(self, path, params=None):
+        resp = self.session.delete(self.url.add_path(path), params=params)
+        raise_for_status(resp)
+        return resp
+
     def _normalize_return_value(self, response):
         json = response.json()
         if json is None:
