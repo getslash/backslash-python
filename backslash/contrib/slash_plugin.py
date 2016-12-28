@@ -26,7 +26,7 @@ from ..client import Backslash as BackslashClient
 from ..exceptions import ParamsTooLarge
 from ..utils import ensure_dir
 from .keepalive_thread import KeepaliveThread
-from .utils import normalize_file_path
+from .utils import normalize_file_path, distill_slash_traceback
 
 from ..__version__ import __version__ as BACKSLASH_CLIENT_VERSION
 
@@ -267,7 +267,7 @@ class BackslashPlugin(PluginInterface):
 
         kwargs = {'message': str(error.exception) if not error.message else error.message,
                   'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
-                  'traceback': error.traceback.to_list()}
+                  'traceback': distill_slash_traceback(error)}
 
         for compact_variables in [False, True]:
             if compact_variables:

@@ -17,3 +17,6 @@ def normalize_file_path(path):
                 return os.path.normpath(os.path.relpath(path, dirname))
         dirname = os.path.dirname(dirname)
     return path
+
+def distill_slash_traceback(err):
+    return err.traceback.to_list()
