@@ -13,6 +13,16 @@ def test_exception_distilling(traceback):
     for f in traceback:
         assert f['code_line']
 
+def test_exception_distilling_surrounding_code(traceback):
+    frame = traceback[-1]
+    assert 'def test_failing():' in [line.strip() for line in frame['code_lines_before']]
+    assert '1/0' in frame['code_line']
+    assert frame['code_lines_before']
+    assert not any('1/0' in l for l in frame['code_lines_before'])
+    assert frame['code_lines_after']
+    assert not any('1/0' in l for l in frame['code_lines_after'])
+
+
 @pytest.fixture
 def traceback(error_result):
     [e] = error_result.get_errors()

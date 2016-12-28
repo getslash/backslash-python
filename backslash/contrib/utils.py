@@ -1,4 +1,5 @@
 import os
+import linecache
 
 _SPECIAL_DIRS = ('.git', '.hg', '.svn')
 
@@ -18,5 +19,17 @@ def normalize_file_path(path):
         dirname = os.path.dirname(dirname)
     return path
 
-def distill_slash_traceback(err):
-    return err.traceback.to_list()
+def distill_slash_traceback(err, line_radius=5):
+    returned = err.traceback.to_list()
+    for frame in returned:
+        lines = linecache.getlines(frame['filename'])
+        lineno = frame['lineno']
+        frame['code_lines_before'], _, frame['code_lines_after'] = _splice_lines(lines, lineno - 1, line_radius)
+    return returned
+
+def _splice_lines(lines, pivot, margin):
+    if pivot >= len(lines):
+        return ([], "<missing line>", [])
+    return (lines[max(0, pivot-margin):pivot],
+            lines[pivot],
+            lines[pivot+1:pivot+1+margin])
