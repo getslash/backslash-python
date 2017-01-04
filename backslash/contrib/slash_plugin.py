@@ -233,9 +233,12 @@ class BackslashPlugin(PluginInterface):
         if self.current_test is None:
             return
 
-        details = {
-            'local_log_path': os.path.abspath(slash.context.result.get_log_path()),
-        }
+        details = {}
+        log_path = slash.context.result.get_log_path()
+
+        if log_path:
+            details['local_log_path'] = os.path.abspath(log_path)
+
         if hasattr(slash.context.result, 'details'):
             additional = slash.context.result.details.all()
         else:
