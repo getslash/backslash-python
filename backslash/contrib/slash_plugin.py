@@ -128,6 +128,10 @@ class BackslashPlugin(PluginInterface):
         self.test_skip(reason=reason)
         self.test_end()
 
+    def test_interrupt(self):
+        if self.current_test is not None:
+            self.current_test.mark_interrupted()
+
     @handle_exceptions
     def test_start(self):
         kwargs = self._get_test_info(slash.context.test)
