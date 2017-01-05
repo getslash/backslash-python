@@ -62,6 +62,11 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def report_not_in_pdb(self):
         self.client.api.call_function('report_not_in_pdb', {'session_id': self.id})
 
+    def report_interrupted(self):
+        if 'report_session_interrupted' in self.client.api.info().endpoints:
+            self.client.api.call_function('report_session_interrupted', {'id': self.id})
+
+
     def add_subject(self, name, product=NOTHING, version=NOTHING, revision=NOTHING):
         return self.client.api.call_function(
             'add_subject',
