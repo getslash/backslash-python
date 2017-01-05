@@ -37,6 +37,7 @@ _logger = logbook.Logger(__name__)
 _PWD = os.path.abspath('.')
 
 _HAS_TEST_AVOIDED = (int(slash.__version__.split('.')[0]) >= 1)
+_HAS_SESSION_INTERRUPT = hasattr(slash.hooks, 'session_interrupt')
 
 
 def handle_exceptions(func):
@@ -127,6 +128,17 @@ class BackslashPlugin(PluginInterface):
         self.test_start()
         self.test_skip(reason=reason)
         self.test_end()
+
+    @handle_exceptions
+    def test_interrupt(self):
+        if self.current_test is not None:
+            self.current_test.report_interrupted()
+
+    @slash.plugins.register_if(_HAS_SESSION_INTERRUPT)
+    @handle_exceptions
+    def session_interrupt(self):
+        if self.session is not None:
+            self.session.report_interrupted()
 
     @handle_exceptions
     def test_start(self):

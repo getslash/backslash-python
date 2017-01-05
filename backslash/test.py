@@ -21,9 +21,8 @@ class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commenta
     def mark_skipped(self, reason=None):
         self.client.api.call_function('report_test_skipped', {'id': self.id, 'reason': reason})
 
-    def mark_interrupted(self):
+    def report_interrupted(self):
         self.client.api.call_function('report_test_interrupted', {'id': self.id})
-
 
     def edit_status(self, status):
         return self.client.api.call_function('edit_test_status', {'id': self.id, 'status': status})
