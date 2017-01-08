@@ -156,6 +156,7 @@ class BackslashPlugin(PluginInterface):
 
         self.current_test = self.session.report_test_start(
             test_logical_id=slash.context.test.__slash__.id,
+            test_index=slash.context.test.__slash__.test_index1,
             **kwargs
         )
         self._error_containers[slash.context.test.__slash__.id] = self.current_test
