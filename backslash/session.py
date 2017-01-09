@@ -10,7 +10,6 @@ from .warning_container import WarningContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
 
-
 class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archiveable, Commentable, RelatedEntityContainer):
 
     @property
@@ -23,21 +22,22 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def send_keepalive(self):
         self.client.api.call_function('send_keepalive', {'session_id': self.id})
 
-    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING, file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING, is_interactive=NOTHING, variation=NOTHING, metadata=NOTHING, test_index=NOTHING):
+    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING, file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING, is_interactive=NOTHING, variation=NOTHING, metadata=NOTHING, test_index=NOTHING, parameters=NOTHING):
 
-
-        params = {'session_id': self.id,
-             'name': name,
-             'scm': scm,
-             'file_hash': file_hash,
-             'scm_revision': scm_revision,
-             'scm_dirty': scm_dirty,
-             'class_name': class_name,
-             'file_name': file_name,
-             'is_interactive': is_interactive,
-             'variation': variation,
-             'test_logical_id': test_logical_id,
-             'test_index': test_index,
+        params = {
+            'session_id': self.id,
+            'name': name,
+            'scm': scm,
+            'file_hash': file_hash,
+            'scm_revision': scm_revision,
+            'scm_dirty': scm_dirty,
+            'class_name': class_name,
+            'file_name': file_name,
+            'is_interactive': is_interactive,
+            'variation': variation,
+            'test_logical_id': test_logical_id,
+            'test_index': test_index,
+            'parameters': _sanitize_params(parameters),
         }
 
         if metadata is not NOTHING:
@@ -91,3 +91,20 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
 
     def toggle_investigated(self):
         return self.client.api.call_function('toggle_investigated', {'session_id': self.id})
+
+
+def _sanitize_params(params, max_length=100):
+    if params is NOTHING:
+        return params
+
+    returned = {}
+
+    for key, value in params.items():
+        if value is not None and not isinstance(value, (int, bool, float, str, bytes)):
+            value = str(value)
+        if isinstance(value, (str, bytes)) and len(value) > max_length:
+            remainder = 5
+            value = value[:max_length-remainder-3] + '...' + value[-remainder:]
+
+        returned[key] = value
+    return returned
