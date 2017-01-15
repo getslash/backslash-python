@@ -87,6 +87,11 @@ class BackslashPlugin(PluginInterface):
         self._runtoken = self._ensure_run_token()
         self.client = BackslashClient(URL(self._get_backslash_url()), self._runtoken)
 
+    def deactivate(self):
+        if self._keepalive_thread is not None:
+            self._keepalive_thread.stop()
+        super(BackslashPlugin, self).deactivate()
+
     @handle_exceptions
     def session_start(self):
         metadata = self._get_initial_session_metadata()
