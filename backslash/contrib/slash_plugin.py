@@ -20,14 +20,14 @@ from slash import config as slash_config
 from slash.plugins import PluginInterface
 from slash.utils.conf_utils import Cmdline, Doc
 from urlobject import URLObject as URL
-
+from requests import HTTPError
 from .._compat import shellquote
 from ..client import Backslash as BackslashClient
 from ..exceptions import ParamsTooLarge
 from ..utils import ensure_dir
 from .keepalive_thread import KeepaliveThread
 from .utils import normalize_file_path, distill_slash_traceback
-
+from ..lazy_query import LazyQuery
 from ..__version__ import __version__ as BACKSLASH_CLIENT_VERSION
 
 _CONFIG_FILE = os.path.expanduser('~/.backslash/config.json')
@@ -170,6 +170,28 @@ class BackslashPlugin(PluginInterface):
     def test_skip(self, reason=None):
         self.current_test.mark_skipped(reason=reason)
 
+    @slash.plugins.registers_on(None)
+    def is_session_exist(self, session_id):
+        try:
+            self.client.api.get('/rest/sessions/{0}'.format(session_id))
+            return True
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                return False
+            raise
+
+    @handle_exceptions
+    @slash.plugins.registers_on(None)
+    def get_tests_to_resume(self, session_id):
+        params = {'session_id':session_id, 'show_successful':'false'}
+        max_retries = 3
+        for i in range(max_retries):
+            try:
+                return LazyQuery(self.client, '/rest/tests', query_params=params).all()
+            except HTTPError:
+                if i == max_retries-1:
+                    raise
+
     def _get_test_info(self, test):
         if test.__slash__.is_interactive():
             returned = {
@@ -195,7 +217,7 @@ class BackslashPlugin(PluginInterface):
                 returned['parameters'] = variation.values.copy()
             else:
                 items = test.__slash__.variation.items()
-            returned['variation'] = dict((name, str(value)) for name, value in items)
+            returned['variation'] = dict((name, value) for name, value in items)
         self._update_scm_info(returned)
         return returned
 
