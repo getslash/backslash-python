@@ -55,6 +55,10 @@ class API(object):
         self.call = CallProxy(self)
         self._cached_info = None
 
+    def __del__(self):
+        if self.session is not None:
+            self.session.close()
+
     def info(self):
         """Inspects the remote API and returns information about its capabilities
         """
