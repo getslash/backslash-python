@@ -3,6 +3,7 @@ import gzip
 import json
 import random
 import time
+from sys import getsizeof
 
 import requests
 from requests.exceptions import ConnectionError, ReadTimeout
@@ -39,7 +40,8 @@ _TYPES_BY_TYPENAME = {
 
 
 _COMPRESS_THRESHOLD = 4 * 1024
-_MAX_PARAMS_SIZE = 5 * 1024 * 1024  # 5Mb
+_MAX_PARAMS_COMPRESSED_SIZE = 5 * 1024 * 1024  # 5Mb
+_MAX_PARAMS_UNCOMPRESSED_SIZE = 10 * 1024 * 1024 # 10Mb
 
 
 class API(object):
@@ -143,6 +145,10 @@ class API(object):
             params = {}
 
         returned = {}
+
+        if self._compute_memory_usage(params) > _MAX_PARAMS_UNCOMPRESSED_SIZE:
+            raise ParamsTooLarge()
+
         for param_name, param_value in iteritems(params):
             if param_value is NOTHING:
                 continue
@@ -152,7 +158,7 @@ class API(object):
         if len(returned) > _COMPRESS_THRESHOLD:
             compressed = True
             returned = self._compress(returned)
-        if len(returned) > _MAX_PARAMS_SIZE:
+        if len(returned) > _MAX_PARAMS_COMPRESSED_SIZE:
             raise ParamsTooLarge()
         return compressed, returned
 
