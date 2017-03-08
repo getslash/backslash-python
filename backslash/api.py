@@ -20,7 +20,7 @@ from .session import Session
 from .suite import Suite
 from .test import Test
 from .user import User
-from .utils import raise_for_status
+from .utils import raise_for_status, compute_memory_usage
 from .warning import Warning
 
 _RETRY_STATUS_CODES = frozenset([
@@ -146,7 +146,7 @@ class API(object):
 
         returned = {}
 
-        if self._compute_memory_usage(params) > _MAX_PARAMS_UNCOMPRESSED_SIZE:
+        if compute_memory_usage(params) > _MAX_PARAMS_UNCOMPRESSED_SIZE:
             raise ParamsTooLarge()
 
         for param_name, param_value in iteritems(params):
