@@ -17,7 +17,7 @@ import git
 import slash
 from sentinels import NOTHING
 from slash import config as slash_config
-from slash.plugins import PluginInterface
+from slash.plugins import PluginInterface, registers_on
 from slash.utils.conf_utils import Cmdline, Doc
 from urlobject import URLObject as URL
 from requests import HTTPError
@@ -57,7 +57,7 @@ class BackslashPlugin(PluginInterface):
 
     current_test = session = None
 
-    def __init__(self, url=None, keepalive_interval=None):
+    def __init__(self, url=None, keepalive_interval=None, runtoken=None):
         super(BackslashPlugin, self).__init__()
         self._url = url
         self._repo_cache = {}
@@ -65,7 +65,7 @@ class BackslashPlugin(PluginInterface):
         self._keepalive_interval = keepalive_interval
         self._keepalive_thread = None
         self._error_containers = {}
-
+        self._runtoken = None
 
     def _handle_exception(self, exc_info):
         pass
@@ -84,7 +84,8 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     def activate(self):
-        self._runtoken = self._ensure_run_token()
+        if self._runtoken is None:
+            self._runtoken = self._ensure_run_token()
         self.client = BackslashClient(URL(self._get_backslash_url()), self._runtoken)
 
     def deactivate(self):
@@ -347,14 +348,16 @@ class BackslashPlugin(PluginInterface):
     #### Token Setup #########
     def _ensure_run_token(self):
 
-        tokens = self._get_existing_tokens()
+        if self._runtoken is None:
 
-        returned = tokens.get(self._get_backslash_url())
-        if returned is None:
-            returned = self._fetch_token()
-            self._save_token(returned)
+            tokens = self._get_existing_tokens()
 
-        return returned
+            returned = tokens.get(self._get_backslash_url())
+            if returned is None:
+                self._runtoken = self._fetch_token_via_browser()
+                self._save_token(returned)
+
+        return self._runtoken
 
     def _get_existing_tokens(self):
         return self._get_config().get('run_tokens', {})
@@ -376,9 +379,31 @@ class BackslashPlugin(PluginInterface):
             json.dump(cfg, f, indent=2)
         os.rename(tmp_filename, _CONFIG_FILE)
 
-    def _fetch_token(self):
+    @registers_on(None)
+    def fetch_token(self, username, password):
+        url = URL(self._get_backslash_url())
+        with requests.Session() as s:
+            resp = s.get(self._get_token_request_url())
+            resp.raise_for_status()
+            response_url = resp.json()['url']
+            request_id = response_url.split('/')[-1]
+            s.post(url.add_path('login'),
+                   data=json.dumps({'username': username, 'password': password}),
+                   headers={'Content-type': 'application/json'})\
+             .raise_for_status()
+
+            s.post(URL(self._get_backslash_url()).add_path('/runtoken/request/{}/complete'.format(request_id)))\
+             .raise_for_status()
+
+            resp = s.get(response_url)
+            resp.raise_for_status()
+            returned = self._runtoken = resp.json()['token']
+            return returned
+
+
+    def _fetch_token_via_browser(self):
         opened_browser = False
-        url = URL(self._get_backslash_url()).add_path('/runtoken/request/new')
+        url = self._get_token_request_url()
         for retry in itertools.count():
             resp = requests.get(url)
             resp.raise_for_status()
@@ -394,6 +419,9 @@ class BackslashPlugin(PluginInterface):
                 print('Waiting for Backlash token...')
                 opened_browser = True
             time.sleep(1)
+
+    def _get_token_request_url(self):
+        return URL(self._get_backslash_url()).add_path('/runtoken/request/new')
 
     def _browse_url(self, url):
         if 'linux' in sys.platform and os.environ.get('DISPLAY') is None:
