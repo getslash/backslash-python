@@ -352,10 +352,10 @@ class BackslashPlugin(PluginInterface):
 
             tokens = self._get_existing_tokens()
 
-            returned = tokens.get(self._get_backslash_url())
-            if returned is None:
+            self._runtoken = tokens.get(self._get_backslash_url())
+            if self._runtoken is None:
                 self._runtoken = self._fetch_token()
-                self._save_token(returned)
+                self._save_token(self._runtoken)
 
         return self._runtoken
 
