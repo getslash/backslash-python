@@ -354,7 +354,7 @@ class BackslashPlugin(PluginInterface):
 
             returned = tokens.get(self._get_backslash_url())
             if returned is None:
-                self._runtoken = self._fetch_token_via_browser()
+                self._runtoken = self._fetch_token()
                 self._save_token(returned)
 
         return self._runtoken
@@ -399,6 +399,16 @@ class BackslashPlugin(PluginInterface):
             resp.raise_for_status()
             returned = self._runtoken = resp.json()['token']
             return returned
+
+
+    def _fetch_token(self):
+        """Template method for the fallback behavior of fetching a runtoken from the server.
+        By default this uses _fetch_token_via_browser to initiate the browser-based
+        authentication.
+
+        You can override this method to provide a custom logic for fetching your tokens
+        """
+        return self._fetch_token_via_browser()
 
 
     def _fetch_token_via_browser(self):
