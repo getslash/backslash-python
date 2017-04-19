@@ -10,6 +10,8 @@ from .warning_container import WarningContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
 
+APPEND_UPCOMING_TESTS_STR = 'append_upcoming_tests'
+
 class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archiveable, Commentable, RelatedEntityContainer):
 
     @property
@@ -55,6 +57,10 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
 
         return returned
 
+    def report_upcoming_tests(self, tests):
+        self.client.api.call_function(APPEND_UPCOMING_TESTS_STR,
+                                      {'tests':tests, 'session_id':self.id}
+                                     )
 
     def report_in_pdb(self):
         self.client.api.call_function('report_in_pdb', {'session_id': self.id})
@@ -75,12 +81,15 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def edit_status(self, status):
         return self.client.api.call_function('edit_session_status', {'id': self.id, 'status': status})
 
-    def query_tests(self):
+    def query_tests(self, include_planned=False):
         """Queries tests of the current session
 
         :rtype: A lazy query object
         """
-        return LazyQuery(self.client, '/rest/sessions/{0}/tests'.format(self.id))
+        params = None
+        if include_planned:
+            params = {'show_planned':'true'}
+        return LazyQuery(self.client, '/rest/sessions/{0}/tests'.format(self.id), query_params=params)
 
     def query_errors(self):
         """Queries tests of the current session

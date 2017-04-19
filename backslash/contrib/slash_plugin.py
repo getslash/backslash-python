@@ -28,6 +28,7 @@ from ..utils import ensure_dir
 from .keepalive_thread import KeepaliveThread
 from .utils import normalize_file_path, distill_slash_traceback
 from ..lazy_query import LazyQuery
+from ..session import APPEND_UPCOMING_TESTS_STR
 from ..__version__ import __version__ as BACKSLASH_CLIENT_VERSION
 
 _CONFIG_FILE = os.path.expanduser('~/.backslash/config.json')
@@ -38,7 +39,6 @@ _PWD = os.path.abspath('.')
 
 _HAS_TEST_AVOIDED = (int(slash.__version__.split('.')[0]) >= 1)
 _HAS_SESSION_INTERRUPT = hasattr(slash.hooks, 'session_interrupt')
-
 
 def handle_exceptions(func):
 
@@ -146,9 +146,37 @@ class BackslashPlugin(PluginInterface):
         if self.session is not None:
             self.session.report_interrupted()
 
+    @slash.plugins.registers_on(None)
+    @handle_exceptions
+    def report_planned_tests(self, tests):
+        if not APPEND_UPCOMING_TESTS_STR in self.client.api.info().endpoints:
+            return
+
+        tests_metadata = []
+        for test in tests:
+            test_info = self._get_test_info(test)
+            current = {'test_logical_id':test.__slash__.id,
+                       'file_name':test_info['file_name'],
+                       'name':test_info['name'],
+                       'class_name':test_info['class_name']
+                      }
+            if 'variation' in test_info:
+                current['variation'] = test_info['variation']
+            tests_metadata.append(current)
+
+        tests_count = 0
+        batch_size = 100
+        try:
+            while tests_count < len(tests_metadata):
+                self.session.report_upcoming_tests(tests_metadata[tests_count:tests_count+batch_size])
+                tests_count += batch_size
+        except requests.exceptions.HTTPError as e:
+            _logger.error('Ignoring exception while reporting planned tests', exc_info=True)
+
     @handle_exceptions
     def test_start(self):
         kwargs = self._get_test_info(slash.context.test)
+        self._update_scm_info(kwargs)
         tags = slash.context.test.__slash__.tags
         tag_dict = {tag_name: tags[tag_name] for tag_name in tags}
 
@@ -219,7 +247,7 @@ class BackslashPlugin(PluginInterface):
             else:
                 items = test.__slash__.variation.items()
             returned['variation'] = dict((name, value) for name, value in items)
-        self._update_scm_info(returned)
+
         return returned
 
     def _update_scm_info(self, test_info):
