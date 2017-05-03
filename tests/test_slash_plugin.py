@@ -1,5 +1,6 @@
 import pytest
 import slash
+import slash.loader
 import munch
 
 from backslash.contrib.utils import distill_slash_traceback
