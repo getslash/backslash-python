@@ -40,6 +40,8 @@ _PWD = os.path.abspath('.')
 _HAS_TEST_AVOIDED = (int(slash.__version__.split('.')[0]) >= 1)
 _HAS_SESSION_INTERRUPT = hasattr(slash.hooks, 'session_interrupt')
 
+_ENV_VARIABLE_METADATA_PREFIX = 'BACKSLASH_METADATA_'
+
 def handle_exceptions(func):
 
     @functools.wraps(func)
@@ -117,13 +119,18 @@ class BackslashPlugin(PluginInterface):
             self._keepalive_thread.start()
 
     def _get_initial_session_metadata(self):
-        return {
+        returned = {
             'slash::version': slash.__version__,
             'slash::commandline': ' '.join(shellquote(arg) for arg in sys.argv),
             'backslash_client_version': BACKSLASH_CLIENT_VERSION,
             'python_version': '.'.join(map(str, sys.version_info[:3])),
             'process_id': os.getpid(),
         }
+
+        for environment_key, environment_value in os.environ.items():
+            if environment_key.startswith(_ENV_VARIABLE_METADATA_PREFIX):
+                returned[environment_key[len(_ENV_VARIABLE_METADATA_PREFIX):]] = environment_value
+        return returned
 
     def _get_extra_session_start_kwargs(self):
         return {}
