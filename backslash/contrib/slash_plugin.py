@@ -50,7 +50,7 @@ def handle_exceptions(func):
             return func(self, *args, **kwargs)
         except Exception: # pylint: disable=broad-except
             exc_info = sys.exc_info()
-            if not self._handle_exception(exc_info): # pylint: disable=protected-access
+            if not self._handle_exception(exc_info) or self._propagate_exceptions: # pylint: disable=protected-access
                 raise
     return new_func
 
@@ -59,7 +59,7 @@ class BackslashPlugin(PluginInterface):
 
     current_test = session = None
 
-    def __init__(self, url=None, keepalive_interval=None, runtoken=None):
+    def __init__(self, url=None, keepalive_interval=None, runtoken=None, propagate_exceptions=False):
         super(BackslashPlugin, self).__init__()
         self._url = url
         self._repo_cache = {}
@@ -68,6 +68,7 @@ class BackslashPlugin(PluginInterface):
         self._keepalive_thread = None
         self._error_containers = {}
         self._runtoken = None
+        self._propagate_exceptions = propagate_exceptions
 
     def _handle_exception(self, exc_info):
         pass
