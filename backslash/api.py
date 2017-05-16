@@ -12,6 +12,7 @@ from munch import munchify
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
+from .__version__ import __version__ as BACKSLASH_CLIENT_VERSION
 from ._compat import BytesIO, TextIOWrapper, iteritems
 from .comment import Comment
 from .error import Error
@@ -53,7 +54,9 @@ class API(object):
         self.runtoken = runtoken
         self.session = requests.Session()
         self.session.headers.update({
-            'X-Backslash-run-token': self.runtoken})
+            'X-Backslash-run-token': self.runtoken,
+            'X-Backslash-client-version': BACKSLASH_CLIENT_VERSION,
+        })
         self.call = CallProxy(self)
         self._cached_info = None
 

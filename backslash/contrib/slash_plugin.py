@@ -40,6 +40,8 @@ _PWD = os.path.abspath('.')
 _HAS_TEST_AVOIDED = (int(slash.__version__.split('.')[0]) >= 1)
 _HAS_SESSION_INTERRUPT = hasattr(slash.hooks, 'session_interrupt')
 
+_ENV_VARIABLE_METADATA_PREFIX = 'BACKSLASH_METADATA_'
+
 def handle_exceptions(func):
 
     @functools.wraps(func)
@@ -48,7 +50,7 @@ def handle_exceptions(func):
             return func(self, *args, **kwargs)
         except Exception: # pylint: disable=broad-except
             exc_info = sys.exc_info()
-            if not self._handle_exception(exc_info): # pylint: disable=protected-access
+            if not self._handle_exception(exc_info) or self._propagate_exceptions: # pylint: disable=protected-access
                 raise
     return new_func
 
@@ -57,7 +59,7 @@ class BackslashPlugin(PluginInterface):
 
     current_test = session = None
 
-    def __init__(self, url=None, keepalive_interval=None, runtoken=None):
+    def __init__(self, url=None, keepalive_interval=None, runtoken=None, propagate_exceptions=False):
         super(BackslashPlugin, self).__init__()
         self._url = url
         self._repo_cache = {}
@@ -66,6 +68,7 @@ class BackslashPlugin(PluginInterface):
         self._keepalive_thread = None
         self._error_containers = {}
         self._runtoken = None
+        self._propagate_exceptions = propagate_exceptions
 
     def _handle_exception(self, exc_info):
         pass
@@ -117,13 +120,18 @@ class BackslashPlugin(PluginInterface):
             self._keepalive_thread.start()
 
     def _get_initial_session_metadata(self):
-        return {
+        returned = {
             'slash::version': slash.__version__,
             'slash::commandline': ' '.join(shellquote(arg) for arg in sys.argv),
             'backslash_client_version': BACKSLASH_CLIENT_VERSION,
             'python_version': '.'.join(map(str, sys.version_info[:3])),
             'process_id': os.getpid(),
         }
+
+        for environment_key, environment_value in os.environ.items():
+            if environment_key.startswith(_ENV_VARIABLE_METADATA_PREFIX):
+                returned[environment_key[len(_ENV_VARIABLE_METADATA_PREFIX):]] = environment_value
+        return returned
 
     def _get_extra_session_start_kwargs(self):
         return {}
