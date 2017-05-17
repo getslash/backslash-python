@@ -99,9 +99,11 @@ class BackslashPlugin(PluginInterface):
     @handle_exceptions
     def session_start(self):
         metadata = self._get_initial_session_metadata()
+        parent_logical_id = getattr(slash.context.session, 'parent_session_id', None)
         try:
             self.session = self.client.report_session_start(
                 logical_id=slash.context.session.id,
+                parent_logical_id=parent_logical_id,
                 total_num_tests=slash.context.session.get_total_num_tests(),
                 hostname=socket.getfqdn(),
                 keepalive_interval=self._keepalive_interval,

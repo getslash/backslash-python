@@ -36,6 +36,7 @@ class Backslash(object):
         self.api.call_function('delete_comment', {'comment_id': comment_id})
 
     def report_session_start(self, logical_id=NOTHING,
+                             parent_logical_id=NOTHING,
                              hostname=NOTHING,
                              total_num_tests=NOTHING,
                              user_email=NOTHING,
@@ -48,7 +49,7 @@ class Backslash(object):
 
         :rtype: A session object representing the reported session
         """
-        returned = self.api.call_function('report_session_start', {
+        params = {
             'hostname': hostname,
             'logical_id': logical_id,
             'total_num_tests': total_num_tests,
@@ -57,7 +58,14 @@ class Backslash(object):
             'keepalive_interval': keepalive_interval,
             'subjects': subjects,
             'infrastructure': infrastructure,
-        })
+        }
+        if parent_logical_id is not None:
+            supports_parent_logical_id = (self.api.info().endpoints.report_session_start.version >= 2)
+
+            if supports_parent_logical_id:
+                params['parent_logical_id'] = parent_logical_id
+
+        returned = self.api.call_function('report_session_start', params)
         return returned
 
     def query_sessions(self):
