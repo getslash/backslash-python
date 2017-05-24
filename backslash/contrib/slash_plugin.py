@@ -26,7 +26,7 @@ from ..client import Backslash as BackslashClient
 from ..exceptions import ParamsTooLarge
 from ..utils import ensure_dir
 from .keepalive_thread import KeepaliveThread
-from .utils import normalize_file_path, distill_slash_traceback
+from .utils import normalize_file_path, distill_slash_traceback, add_environment_variable_metadata
 from ..lazy_query import LazyQuery
 from ..session import APPEND_UPCOMING_TESTS_STR
 from ..__version__ import __version__ as BACKSLASH_CLIENT_VERSION
@@ -39,8 +39,6 @@ _PWD = os.path.abspath('.')
 
 _HAS_TEST_AVOIDED = (int(slash.__version__.split('.')[0]) >= 1)
 _HAS_SESSION_INTERRUPT = hasattr(slash.hooks, 'session_interrupt')
-
-_ENV_VARIABLE_METADATA_PREFIX = 'BACKSLASH_METADATA_'
 
 def handle_exceptions(func):
 
@@ -130,9 +128,7 @@ class BackslashPlugin(PluginInterface):
             'process_id': os.getpid(),
         }
 
-        for environment_key, environment_value in os.environ.items():
-            if environment_key.startswith(_ENV_VARIABLE_METADATA_PREFIX):
-                returned[environment_key[len(_ENV_VARIABLE_METADATA_PREFIX):]] = environment_value
+        add_environment_variable_metadata(metadata=returned)
         return returned
 
     def _get_extra_session_start_kwargs(self):

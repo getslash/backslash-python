@@ -33,3 +33,21 @@ def _splice_lines(lines, pivot, margin):
     return (lines[max(0, pivot-margin):pivot],
             lines[pivot],
             lines[pivot+1:pivot+1+margin])
+
+_ENV_VARIABLE_METADATA_PREFIX = 'BACKSLASH_METADATA_'
+
+def add_environment_variable_metadata(metadata, environ=None):
+    if environ is None:
+        environ = os.environ
+
+    for environment_key, environment_value in environ.items():
+        if environment_key.startswith(_ENV_VARIABLE_METADATA_PREFIX):
+            _nested_assign(metadata, environment_key[len(_ENV_VARIABLE_METADATA_PREFIX):], environment_value)
+
+def _nested_assign(dictionary, key, value):
+    parts = key.split('.')
+    for index, part in enumerate(parts):
+        if index == len(parts) - 1:
+            dictionary[part] = value
+        else:
+            dictionary = dictionary.setdefault(part, {})
