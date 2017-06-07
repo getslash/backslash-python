@@ -37,6 +37,8 @@ class Backslash(object):
 
     def report_session_start(self, logical_id=NOTHING,
                              parent_logical_id=NOTHING,
+                             is_parent_session=False,
+                             child_id=NOTHING,
                              hostname=NOTHING,
                              total_num_tests=NOTHING,
                              user_email=NOTHING,
@@ -59,11 +61,13 @@ class Backslash(object):
             'subjects': subjects,
             'infrastructure': infrastructure,
         }
-        if parent_logical_id is not None:
-            supports_parent_logical_id = (self.api.info().endpoints.report_session_start.version >= 2)
+        if parent_logical_id is not None or is_parent_session:
+            supports_parallel = (self.api.info().endpoints.report_session_start.version >= 2)
 
-            if supports_parent_logical_id:
+            if supports_parallel:
                 params['parent_logical_id'] = parent_logical_id
+                params['is_parent_session'] = is_parent_session
+                params['child_id'] = child_id
 
         returned = self.api.call_function('report_session_start', params)
         return returned
