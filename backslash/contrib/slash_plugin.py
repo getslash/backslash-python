@@ -98,7 +98,7 @@ class BackslashPlugin(PluginInterface):
     def session_start(self):
         metadata = self._get_initial_session_metadata()
         is_parent_session = False
-        parent_logical_id = worker_id = None
+        parent_logical_id = child_id = None
         is_slash_support_parallel = getattr(slash_config.root, 'parallel', False)
         if is_slash_support_parallel and slash_config.root.parallel.num_workers:
             child_id = slash_config.root.parallel.worker_id
@@ -106,6 +106,7 @@ class BackslashPlugin(PluginInterface):
                 parent_logical_id = getattr(slash.context.session, 'parent_session_id', None)
             else:
                 is_parent_session = True
+
         try:
             self.session = self.client.report_session_start(
                 logical_id=slash.context.session.id,
