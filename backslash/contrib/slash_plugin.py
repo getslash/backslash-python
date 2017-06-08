@@ -97,11 +97,21 @@ class BackslashPlugin(PluginInterface):
     @handle_exceptions
     def session_start(self):
         metadata = self._get_initial_session_metadata()
-        parent_logical_id = getattr(slash.context.session, 'parent_session_id', None)
+        is_parent_session = False
+        parent_logical_id = worker_id = None
+        is_slash_support_parallel = getattr(slash_config.root, 'parallel', False)
+        if is_slash_support_parallel and slash_config.root.parallel.num_workers:
+            child_id = slash_config.root.parallel.worker_id
+            if child_id is not None:
+                parent_logical_id = getattr(slash.context.session, 'parent_session_id', None)
+            else:
+                is_parent_session = True
         try:
             self.session = self.client.report_session_start(
                 logical_id=slash.context.session.id,
                 parent_logical_id=parent_logical_id,
+                is_parent_session=is_parent_session,
+                child_id=child_id,
                 total_num_tests=slash.context.session.get_total_num_tests(),
                 hostname=socket.getfqdn(),
                 keepalive_interval=self._keepalive_interval,
