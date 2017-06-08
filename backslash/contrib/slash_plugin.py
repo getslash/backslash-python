@@ -354,9 +354,15 @@ class BackslashPlugin(PluginInterface):
             _logger.error('Could not determine error container to report on for {}', result)
             return
 
-        kwargs = {'message': str(error.exception) if not error.message else error.message,
-                  'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
+        kwargs = {'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
                   'traceback': distill_slash_traceback(error)}
+        if error.message:
+            message = error.message
+        elif hasattr(error, 'exception_str'):
+            message = error.exception_str
+        else:
+            message = str(error.exception)
+        kwargs['message'] = message
 
         for compact_variables in [False, True]:
             if compact_variables:
