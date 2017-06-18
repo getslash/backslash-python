@@ -342,10 +342,10 @@ class BackslashPlugin(PluginInterface):
         if result is slash.session.results.global_result:
             error_container = self.session
         else:
-            error_container = self._error_containers.get(result.test_metadata.id, self.current_test)
+            error_container = self._error_containers.get(result.test_metadata.id, self.current_test) or self.session
 
         if error_container is None:
-            _logger.error('Could not determine error container to report on for {}', result)
+            _logger.debug('Could not determine error container to report on for {}', result)
             return
 
         kwargs = {'message': str(error.exception) if not error.message else error.message,
