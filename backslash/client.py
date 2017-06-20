@@ -68,6 +68,8 @@ class Backslash(object):
                 params['parent_logical_id'] = parent_logical_id
                 params['is_parent_session'] = is_parent_session
                 params['child_id'] = child_id
+                if child_id is not None:
+                    del params['total_num_tests']
 
         returned = self.api.call_function('report_session_start', params)
         return returned
