@@ -1,6 +1,7 @@
 slash
 Flask
 Flask-Loopback
+pylint
 pytest
 pytest-cov
 URLObject

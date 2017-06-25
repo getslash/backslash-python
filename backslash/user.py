@@ -1,7 +1,5 @@
-# pylint: disable=no-member
-
 from .api_object import APIObject
 
 
-class User(APIObject):
+class User(APIObject):  # pylint: disable=abstract-method
     pass

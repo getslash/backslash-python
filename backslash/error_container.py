@@ -11,14 +11,14 @@ class ErrorContainer(object):
 
     def add_error(self, message, exception_type=NOTHING, traceback=NOTHING, timestamp=NOTHING, is_failure=NOTHING):
 
-        kwargs = {self._get_id_key(): self.id,
+        kwargs = {self._get_id_key(): self.id,  # pylint: disable=no-member
                   'message': message,
                   'exception_type': exception_type,
                   'is_failure': is_failure,
                   'timestamp': timestamp
                   }
 
-        has_streaming_upload = self.client.api.info().endpoints.add_error.version >= 2
+        has_streaming_upload = self.client.api.info().endpoints.add_error.version >= 2  # pylint: disable=no-member
 
         if traceback is not NOTHING and not has_streaming_upload:
             kwargs['traceback'] = traceback

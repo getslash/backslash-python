@@ -3,7 +3,6 @@ import gzip
 import json
 import random
 import time
-from sys import getsizeof
 
 import requests
 from requests.exceptions import ConnectionError, ReadTimeout
@@ -119,16 +118,16 @@ class API(object):
         return resp
 
     def _normalize_return_value(self, response):
-        json = response.json()
-        if json is None:
+        json_res = response.json()
+        if json_res is None:
             return None
-        result = json.get('result')
+        result = json_res.get('result')
         if result is None:
-            if isinstance(json, dict):
-                for key, value in json.items():
+            if isinstance(json_res, dict):
+                for key, value in json_res.items():
                     if isinstance(value, dict) and value.get('type') == key:
                         return self.build_api_object(value)
-            return json
+            return json_res
         elif isinstance(result, dict) and 'type' in result:
             return self.build_api_object(result)
         return result

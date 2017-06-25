@@ -6,7 +6,6 @@ from sentinels import NOTHING
 from urlobject import URLObject as URL
 
 from .api import API
-from .compatibility import Compatibility
 from .lazy_query import LazyQuery
 
 

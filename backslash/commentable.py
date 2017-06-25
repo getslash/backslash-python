@@ -1,5 +1,6 @@
 from .lazy_query import LazyQuery
 
+
 class Commentable(object):
 
     def post_comment(self, comment):

@@ -24,7 +24,9 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def send_keepalive(self):
         self.client.api.call_function('send_keepalive', {'session_id': self.id})
 
-    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING, file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING, is_interactive=NOTHING, variation=NOTHING, metadata=NOTHING, test_index=NOTHING, parameters=NOTHING):
+    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING,
+                          file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING, is_interactive=NOTHING,
+                          variation=NOTHING, metadata=NOTHING, test_index=NOTHING, parameters=NOTHING):
 
         params = {
             'session_id': self.id,
