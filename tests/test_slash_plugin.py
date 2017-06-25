@@ -1,12 +1,13 @@
 import pytest
 import slash
 import slash.loader
-import munch
 
 from backslash.contrib.utils import distill_slash_traceback
 
+# pylint: disable=redefined-outer-name
+
 def test_importing_slash_plugin():
-    from backslash.contrib import slash_plugin
+    from backslash.contrib import slash_plugin  # pylint: disable=unused-variable
 
 def test_exception_distilling(traceback):
     assert isinstance(traceback, list)
@@ -33,7 +34,7 @@ def traceback(error_result):
 def error_result():
 
     def test_failing():
-        1/0
+        1/0  # pylint: disable=pointless-statement
 
     with slash.Session() as s:
         with s.get_started_context():

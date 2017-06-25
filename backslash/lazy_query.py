@@ -4,7 +4,7 @@ import itertools
 import requests
 from sentinels import NOTHING
 
-from ._compat import xrange, iteritems
+from ._compat import iteritems
 from .utils import raise_for_status
 
 

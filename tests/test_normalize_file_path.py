@@ -1,6 +1,7 @@
 import pytest
 from backslash.contrib.utils import normalize_file_path
 
+# pylint: disable=redefined-outer-name
 
 def test_normalize_file_path(file_path, expected_path):
     assert file_path != expected_path

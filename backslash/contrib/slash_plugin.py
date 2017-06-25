@@ -65,7 +65,7 @@ class BackslashPlugin(PluginInterface):
         self._keepalive_interval = keepalive_interval
         self._keepalive_thread = None
         self._error_containers = {}
-        self._runtoken = None
+        self._runtoken = runtoken
         self._propagate_exceptions = propagate_exceptions
 
     def _handle_exception(self, exc_info):
@@ -79,7 +79,8 @@ class BackslashPlugin(PluginInterface):
 
     def get_config(self):
         return {
-            "session_labels": [] // Doc('Specify labels to be added to the session when reported') // Cmdline(append="--session-label", metavar="LABEL"),
+            "session_labels": [] // Doc('Specify labels to be added to the session when reported') \
+                                 // Cmdline(append="--session-label", metavar="LABEL"),
         }
 
 
@@ -187,7 +188,7 @@ class BackslashPlugin(PluginInterface):
             while tests_count < len(tests_metadata):
                 self.session.report_upcoming_tests(tests_metadata[tests_count:tests_count+batch_size])
                 tests_count += batch_size
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPError:
             _logger.error('Ignoring exception while reporting planned tests', exc_info=True)
 
     @handle_exceptions

@@ -2,17 +2,16 @@ from uuid import uuid1
 import operator
 
 from flask import Flask, jsonify
-from flask.ext.loopback import FlaskLoopback
+from flask_loopback import FlaskLoopback
 from sentinels import NOTHING
 from urlobject import URLObject as URL
 
 import pytest
 from backslash import Backslash
-from backslash.api_object import APIObject
 from backslash.lazy_query import LazyQuery
 from backslash import FIELDS
-from weber_utils.pagination import paginated_view
 
+# pylint: disable=redefined-outer-name
 
 def test_all_objects(query, num_objects):
     assert [obj.id for obj in query] == list(range(num_objects))
@@ -20,7 +19,7 @@ def test_all_objects(query, num_objects):
 
 def test_count_objects(query, num_objects):
     assert len(query) == num_objects
-    assert len(query._fetched) < num_objects
+    assert len(query._fetched) < num_objects  # pylint: disable=protected-access
 
 
 def test_getitem(query):
@@ -29,27 +28,27 @@ def test_getitem(query):
 
 def test_last_item(query, num_objects, page_size):
     assert query[-1].id == num_objects - 1
-    assert query._fetched[page_size] is NOTHING
+    assert query._fetched[page_size] is NOTHING  # pylint: disable=protected-access
 
 
 def test_slicing_not_supported(query):
     with pytest.raises(NotImplementedError):
-        query[1:20]
+        query[1:20]  # pylint: disable=pointless-statement
 
 
 def test_querying_simple_equality(query):
-    assert query._url.query == ''
+    assert query._url.query == ''  # pylint: disable=protected-access
     query = query.filter(x=1)
-    assert query._url.query == 'x=1'
+    assert query._url.query == 'x=1'  # pylint: disable=protected-access
 
 
 def test_querying_with_field_queries(query, field_value, operator_name, operator_func):
     query = query.filter(operator_func(FIELDS.field_name, field_value))
-    assert query._url.query == 'field_name={0}%3A{1}'.format(
+    assert query._url.query == 'field_name={0}%3A{1}'.format(  # pylint: disable=protected-access
         operator_name, field_value)
 
 def test_querying_between(query):
-    assert query.filter(1 <= FIELDS.x <= 2)._url.query == 'x=ge%3A1&x=le%3A2'
+    assert query.filter(1 <= FIELDS.x <= 2)._url.query == 'x=ge%3A1&x=le%3A2'  # pylint: disable=protected-access
 
 
 @pytest.fixture
@@ -81,19 +80,19 @@ def url(request, flask_app):
     webapp.activate_address((address, 80))
 
     @request.addfinalizer
-    def finalize():
+    def finalize():  # pylint: disable=unused-variable
         webapp.deactivate_address((address, 80))
     return returned
 
 
 @pytest.fixture
-def flask_app(page_size, num_objects):
+def flask_app():
 
     app = Flask(__name__)
     app.config['PROPAGATE_EXCEPTIONS'] = True
 
     @app.route('/')
-    def view_objects():
+    def view_objects():  # pylint: disable=unused-variable
         return jsonify({
             'sessions': [{'id': i, 'type': 'session'}
                          for i in range(10)]})

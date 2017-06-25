@@ -17,10 +17,10 @@ class APIObject(object):
     def __eq__(self, other):
         if not isinstance(other, APIObject):
             return NotImplemented
-        return self.client is other.client and self._data == other._data
+        return self.client is other.client and self._data == other._data  # pylint: disable=protected-access
 
     def __ne__(self, other):
-        return not (self == other)
+        return not (self == other)  # pylint: disable=superfluous-parens
 
     def __getattr__(self, name):
         try:
