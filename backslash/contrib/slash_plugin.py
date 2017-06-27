@@ -206,6 +206,10 @@ class BackslashPlugin(PluginInterface):
                 },
             }
 
+        log_path = slash.context.result.get_log_path()
+        if log_path:
+            kwargs.setdefault('metadata', {})['local_log_path'] = os.path.abspath(log_path)
+
         self.current_test = self.session.report_test_start(
             test_logical_id=slash.context.test.__slash__.id,
             test_index=slash.context.test.__slash__.test_index1,
@@ -322,10 +326,6 @@ class BackslashPlugin(PluginInterface):
             return
 
         details = {}
-        log_path = slash.context.result.get_log_path()
-
-        if log_path:
-            details['local_log_path'] = os.path.abspath(log_path)
 
         if hasattr(slash.context.result, 'details'):
             additional = slash.context.result.details.all()
