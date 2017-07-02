@@ -61,6 +61,9 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
 
         return returned
 
+    def report_test_distributed(self, test_logical_id):
+        self.client.api.call_function('report_test_distributed', {'session_id': self.id, 'test_logical_id': test_logical_id})
+
     def report_upcoming_tests(self, tests):
         self.client.api.call_function(APPEND_UPCOMING_TESTS_STR,
                                       {'tests':tests, 'session_id':self.id}
