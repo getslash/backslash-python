@@ -103,6 +103,9 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def toggle_investigated(self):
         return self.client.api.call_function('toggle_investigated', {'session_id': self.id})
 
+    def get_parent(self):
+        return None
+
 
 def _sanitize_params(params, max_length=100):
     if params is NOTHING:

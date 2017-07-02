@@ -4,6 +4,7 @@ from .api_object import APIObject
 from .commentable import Commentable
 from .error_container import ErrorContainer
 from .related_entity_container import RelatedEntityContainer
+from .session import Session
 from .warning_container import WarningContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
@@ -36,3 +37,6 @@ class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commenta
 
     def get_session(self):
         return self.client.api.get('/rest/sessions/{0}'.format(self.session_id))
+
+    def get_parent(self):
+        return self.get_session()
