@@ -341,7 +341,13 @@ class BackslashPlugin(PluginInterface):
         try:
             if self._keepalive_thread is not None:
                 self._keepalive_thread.stop()
-            self.session.report_end()
+
+            kwargs = {}
+            session_results = getattr(slash.session, 'results', None)
+            has_fatal_errors = hasattr(session_results, 'has_fatal_errors') and session_results.has_fatal_errors()
+            if self.client.api.info().endpoints.report_session_end.version >= 2:
+                kwargs['has_fatal_errors'] = has_fatal_errors
+            self.session.report_end(**kwargs)
         except Exception:       # pylint: disable=broad-except
             _logger.error('Exception ignored in session_end', exc_info=True)
 
