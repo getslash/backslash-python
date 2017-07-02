@@ -18,8 +18,10 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def ui_url(self):
         return self.client.url + '#/sessions/{}'.format(self.logical_id or self.id)
 
-    def report_end(self, duration=NOTHING):
-        self.client.api.call_function('report_session_end', {'id': self.id, 'duration': duration})
+    def report_end(self, duration=NOTHING, has_fatal_errors=NOTHING):
+
+        kwargs = {'id': self.id, 'duration': duration, 'has_fatal_errors': has_fatal_errors}
+        self.client.api.call_function('report_session_end', kwargs)
 
     def send_keepalive(self):
         self.client.api.call_function('send_keepalive', {'session_id': self.id})
@@ -102,6 +104,9 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
 
     def toggle_investigated(self):
         return self.client.api.call_function('toggle_investigated', {'session_id': self.id})
+
+    def get_parent(self):
+        return None
 
 
 def _sanitize_params(params, max_length=100):
