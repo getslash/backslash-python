@@ -4,7 +4,6 @@ from .api_object import APIObject
 from .commentable import Commentable
 from .error_container import ErrorContainer
 from .related_entity_container import RelatedEntityContainer
-from .session import Session
 from .warning_container import WarningContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
