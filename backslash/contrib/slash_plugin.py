@@ -363,7 +363,7 @@ class BackslashPlugin(PluginInterface):
             return
 
         kwargs = {'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
-                  'traceback': distill_slash_traceback(error)}
+                  'traceback': distill_slash_traceback(error), 'exception_attrs': getattr(error, 'exception_attributes', NOTHING)}
         if error.message:
             message = error.message
         elif hasattr(error, 'exception_str'):
