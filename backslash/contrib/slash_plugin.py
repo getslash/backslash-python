@@ -39,6 +39,7 @@ _PWD = os.path.abspath('.')
 
 _HAS_TEST_AVOIDED = (int(slash.__version__.split('.')[0]) >= 1)
 _HAS_SESSION_INTERRUPT = hasattr(slash.hooks, 'session_interrupt')
+_HAS_TEST_DISTRIBUTED = hasattr(slash.hooks, 'test_distributed')
 
 def handle_exceptions(func):
 
@@ -216,6 +217,12 @@ class BackslashPlugin(PluginInterface):
             **kwargs
         )
         self._error_containers[slash.context.test.__slash__.id] = self.current_test
+
+    @slash.plugins.register_if(_HAS_TEST_DISTRIBUTED)
+    @handle_exceptions #pylint: disable=unused-argument
+    def test_distributed(self, test_logical_id, worker_session_id): #pylint: disable=unused-argument
+        if 'report_test_distributed' in self.client.api.info().endpoints:
+            self.current_test = self.session.report_test_distributed(test_logical_id)
 
     @handle_exceptions
     def test_skip(self, reason=None):
