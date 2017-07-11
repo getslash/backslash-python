@@ -15,9 +15,16 @@ class KeepaliveThread(threading.Thread):
         self.daemon = True
 
     def run(self):
-        while not self._stopped_event.is_set():
-            self._stopped_event.wait(timeout=self._interval)
-            self._session.send_keepalive()
+        _logger.debug('Backslash keepalive thread started')
+        try:
+            while not self._stopped_event.is_set():
+                self._stopped_event.wait(timeout=self._interval)
+                self._session.send_keepalive()
+        except Exception: #pylint: disable=broad-except
+            _logger.error('Quitting keepalive thread due to exception', exc_info=True)
+            raise
+        finally:
+            _logger.debug('Backslash keepalive thread terminated')
 
     def stop(self):
         self._stopped_event.set()
