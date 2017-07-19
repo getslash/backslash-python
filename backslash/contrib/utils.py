@@ -1,5 +1,6 @@
 import os
 import linecache
+import ast
 
 _SPECIAL_DIRS = ('.git', '.hg', '.svn')
 
@@ -19,12 +20,20 @@ def normalize_file_path(path):
         dirname = os.path.dirname(dirname)
     return path
 
+def _is_ipython_frame(frame):
+    return 'ipython-input' in frame['filename'] and frame['lineno'] == 1
+
 def distill_slash_traceback(err, line_radius=5):
     returned = err.traceback.to_list()
     for frame in returned:
-        lines = linecache.getlines(frame['filename'])
-        lineno = frame['lineno']
-        frame['code_lines_before'], _, frame['code_lines_after'] = _splice_lines(lines, lineno - 1, line_radius)
+        if _is_ipython_frame(frame):
+            commands = ast.literal_eval(frame['locals']['In']['value'])
+            frame['code_lines_before'], frame['code_line'], frame['code_lines_after'] = _splice_lines(commands, len(commands) -1, line_radius)
+            frame['lineno'] = len(commands) - 1
+        else:
+            lines = linecache.getlines(frame['filename'])
+            lineno = frame['lineno']
+            frame['code_lines_before'], _, frame['code_lines_after'] = _splice_lines(lines, lineno - 1, line_radius)
     return returned
 
 def _splice_lines(lines, pivot, margin):
