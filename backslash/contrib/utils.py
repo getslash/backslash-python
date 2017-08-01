@@ -27,7 +27,13 @@ def distill_slash_traceback(err, line_radius=5):
     returned = err.traceback.to_list()
     for frame in returned:
         if _is_ipython_frame(frame):
-            commands = ast.literal_eval(frame['locals']['In']['value'])
+            commands = frame['locals'].get('In', {}).get('value', None)
+            if not commands:
+                continue
+            try:
+                commands = ast.literal_eval(commands)
+            except SyntaxError:
+                continue
             frame['code_lines_before'], frame['code_line'], frame['code_lines_after'] = _splice_lines(commands, len(commands) -1, line_radius)
             frame['lineno'] = len(commands) - 1
         else:
