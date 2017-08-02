@@ -13,7 +13,11 @@ import webbrowser
 import logbook
 import requests
 
-import git
+try:
+    import git
+except Exception as e: # pylint: disable=broad-except
+    pass
+
 import slash
 from sentinels import NOTHING
 from slash import config as slash_config
