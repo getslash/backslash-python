@@ -75,11 +75,11 @@ class BackslashPlugin(PluginInterface):
 
     @property
     def rest_url(self):
-        return URL(self._url).add_path('rest')
+        return URL(self._get_backslash_url()).add_path('rest')
 
     @property
     def webapp_url(self):
-        returned = str(self._url)
+        returned = str(self._get_backslash_url())
         if not returned.endswith('/'):
             returned += '/'
         returned += '#/'
