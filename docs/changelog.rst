@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :feature:`-` Move to PBR
 * :bug:`31 major` Be more resilient to I/O errors when compressing tracebacks
 * :feature:`39` Added ``webapp_url`` and ``rest_url`` to the official Slash plugin
 * :feature:`37` Support reporting fatal exceptions

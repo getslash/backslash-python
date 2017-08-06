@@ -10,3 +10,5 @@ dist
 htmlcov
 .cache
 flycheck_*
+
+/.eggs
