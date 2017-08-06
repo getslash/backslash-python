@@ -88,6 +88,9 @@ class BackslashPlugin(PluginInterface):
     def _handle_exception(self, exc_info):
         pass
 
+    def _handle_keepalive_exception(self, exc_info):
+        pass
+
     def _get_backslash_url(self):
         return self._url
 
@@ -145,7 +148,7 @@ class BackslashPlugin(PluginInterface):
             self.client.api.call.add_label(session_id=self.session.id, label=label)
 
         if self._keepalive_interval is not None:
-            self._keepalive_thread = KeepaliveThread(self.client, self.session, self._keepalive_interval)
+            self._keepalive_thread = KeepaliveThread(self.client, self.session, self._keepalive_interval, error_callback=self._handle_keepalive_exception)
             self._keepalive_thread.start()
 
     def _get_initial_session_metadata(self):
