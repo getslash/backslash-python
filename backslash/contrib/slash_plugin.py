@@ -73,6 +73,18 @@ class BackslashPlugin(PluginInterface):
         self._runtoken = runtoken
         self._propagate_exceptions = propagate_exceptions
 
+    @property
+    def rest_url(self):
+        return URL(self._url).add_path('rest')
+
+    @property
+    def webapp_url(self):
+        returned = str(self._url)
+        if not returned.endswith('/'):
+            returned += '/'
+        returned += '#/'
+        return returned
+
     def _handle_exception(self, exc_info):
         pass
 
