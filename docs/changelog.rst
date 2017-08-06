@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :bug:`31 major` Be more resilient to I/O errors when compressing tracebacks
 * :feature:`37` Support reporting fatal exceptions
 * :feature:`36` Added ``get_parent`` to test objects to retrieve the parent session
 * :release:`2.28.0 <15-05-2017>`
