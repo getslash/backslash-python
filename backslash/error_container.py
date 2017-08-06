@@ -4,7 +4,11 @@ import tempfile
 
 from ._compat import TextIOWrapper
 
+import logbook
 from sentinels import NOTHING
+
+
+_logger = logbook.Logger(__name__)
 
 
 class ErrorContainer(object):
@@ -39,17 +43,25 @@ class ErrorContainer(object):
         returned = self.client.api.call_function('add_error', kwargs) # pylint: disable=no-member
 
         if has_streaming_upload and traceback_info is not NOTHING:
-            traceback_url = returned.api_url.add_path('traceback')
-            with tempfile.TemporaryFile(mode='w+b') as traceback_file:
+            self._compress_traceback(returned, traceback_info)
+
+        return returned
+
+    def _compress_traceback(self, error, traceback_info):
+        traceback_url = error.api_url.add_path('traceback')
+        with tempfile.TemporaryFile(mode='w+b') as traceback_file:
+            try:
                 with gzip.GzipFile(fileobj=traceback_file, mode='w+b') as compressed_file_raw:
                     with TextIOWrapper(compressed_file_raw) as compressed_file:
                         json.dump(traceback_info, compressed_file)
+            except IOError:
+                _logger.error('Unable to compress traceback on disk. Reporting error without traceback', exc_info=True)
+                return
 
-                traceback_file.seek(0)
-                resp = self.client.api.session.put(traceback_url, data=traceback_file) # pylint: disable=no-member
-                resp.raise_for_status()
-            returned.refresh()
-        return returned
+            traceback_file.seek(0)
+            resp = self.client.api.session.put(traceback_url, data=traceback_file) # pylint: disable=no-member
+            resp.raise_for_status()
+        error.refresh()
 
     def add_failure(self, message, **kwargs):
         return self.add_error(message, is_failure=True, **kwargs)
