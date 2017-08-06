@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :release:`2.29.0 <6-7-2017>`
 * :feature:`49` Add hook for intercepting keepalive thread exceptions
 * :feature:`-` Move to PBR
 * :bug:`31 major` Be more resilient to I/O errors when compressing tracebacks
