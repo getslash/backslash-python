@@ -1,6 +1,6 @@
 class FieldFilter(object):
 
-    def __init__(self, field_name, operator_name=None, value=None):
+    def __init__(self, field_name):
         super(FieldFilter, self).__init__()
         self.field_name = field_name
         self._filters = []
@@ -13,14 +13,13 @@ class FieldFilter(object):
 def _add_field_proxy_operator_method(operator_name):
 
     def method(self, other):
-        self._filters.append((operator_name, other))
+        self._filters.append((operator_name, other))  # pylint: disable=protected-access
         return self
     method_name = method.__name__ = '__{0}__'.format(operator_name)
     setattr(FieldFilter, method_name, method)
 
 for _operator_name in ['eq', 'ne', 'lt', 'le', 'gt', 'ge']:
     _add_field_proxy_operator_method(_operator_name)
-
 
 
 class _Fields(object):

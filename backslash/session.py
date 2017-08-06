@@ -18,13 +18,17 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def ui_url(self):
         return self.client.url + '#/sessions/{}'.format(self.logical_id or self.id)
 
-    def report_end(self, duration=NOTHING):
-        self.client.api.call_function('report_session_end', {'id': self.id, 'duration': duration})
+    def report_end(self, duration=NOTHING, has_fatal_errors=NOTHING):
+
+        kwargs = {'id': self.id, 'duration': duration, 'has_fatal_errors': has_fatal_errors}
+        self.client.api.call_function('report_session_end', kwargs)
 
     def send_keepalive(self):
         self.client.api.call_function('send_keepalive', {'session_id': self.id})
 
-    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING, file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING, is_interactive=NOTHING, variation=NOTHING, metadata=NOTHING, test_index=NOTHING, parameters=NOTHING):
+    def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING,
+                          file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING, is_interactive=NOTHING,
+                          variation=NOTHING, metadata=NOTHING, test_index=NOTHING, parameters=NOTHING):
 
         params = {
             'session_id': self.id,
@@ -56,6 +60,9 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
             returned.set_metadata_dict(metadata)
 
         return returned
+
+    def report_test_distributed(self, test_logical_id):
+        self.client.api.call_function('report_test_distributed', {'session_id': self.id, 'test_logical_id': test_logical_id})
 
     def report_upcoming_tests(self, tests):
         self.client.api.call_function(APPEND_UPCOMING_TESTS_STR,
@@ -100,6 +107,9 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
 
     def toggle_investigated(self):
         return self.client.api.call_function('toggle_investigated', {'session_id': self.id})
+
+    def get_parent(self):
+        return None
 
 
 def _sanitize_params(params, max_length=100):

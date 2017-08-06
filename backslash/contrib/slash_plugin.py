@@ -30,7 +30,7 @@ from ..client import Backslash as BackslashClient
 from ..exceptions import ParamsTooLarge
 from ..utils import ensure_dir
 from .keepalive_thread import KeepaliveThread
-from .utils import normalize_file_path, distill_slash_traceback
+from .utils import normalize_file_path, distill_slash_traceback, add_environment_variable_metadata
 from ..lazy_query import LazyQuery
 from ..session import APPEND_UPCOMING_TESTS_STR
 from ..__version__ import __version__ as BACKSLASH_CLIENT_VERSION
@@ -43,8 +43,7 @@ _PWD = os.path.abspath('.')
 
 _HAS_TEST_AVOIDED = (int(slash.__version__.split('.')[0]) >= 1)
 _HAS_SESSION_INTERRUPT = hasattr(slash.hooks, 'session_interrupt')
-
-_ENV_VARIABLE_METADATA_PREFIX = 'BACKSLASH_METADATA_'
+_HAS_TEST_DISTRIBUTED = hasattr(slash.hooks, 'test_distributed')
 
 def handle_exceptions(func):
 
@@ -71,10 +70,25 @@ class BackslashPlugin(PluginInterface):
         self._keepalive_interval = keepalive_interval
         self._keepalive_thread = None
         self._error_containers = {}
-        self._runtoken = None
+        self._runtoken = runtoken
         self._propagate_exceptions = propagate_exceptions
 
+    @property
+    def rest_url(self):
+        return URL(self._url).add_path('rest')
+
+    @property
+    def webapp_url(self):
+        returned = str(self._url)
+        if not returned.endswith('/'):
+            returned += '/'
+        returned += '#/'
+        return returned
+
     def _handle_exception(self, exc_info):
+        pass
+
+    def _handle_keepalive_exception(self, exc_info):
         pass
 
     def _get_backslash_url(self):
@@ -85,7 +99,8 @@ class BackslashPlugin(PluginInterface):
 
     def get_config(self):
         return {
-            "session_labels": [] // Doc('Specify labels to be added to the session when reported') // Cmdline(append="--session-label", metavar="LABEL"),
+            "session_labels": [] // Doc('Specify labels to be added to the session when reported') \
+                                 // Cmdline(append="--session-label", metavar="LABEL"),
         }
 
 
@@ -103,11 +118,22 @@ class BackslashPlugin(PluginInterface):
     @handle_exceptions
     def session_start(self):
         metadata = self._get_initial_session_metadata()
-        parent_logical_id = getattr(slash.context.session, 'parent_session_id', None)
+        is_parent_session = False
+        parent_logical_id = child_id = None
+        is_slash_support_parallel = getattr(slash_config.root, 'parallel', False)
+        if is_slash_support_parallel and slash_config.root.parallel.num_workers:
+            child_id = slash_config.root.parallel.worker_id
+            if child_id is not None:
+                parent_logical_id = getattr(slash.context.session, 'parent_session_id', None)
+            else:
+                is_parent_session = True
+
         try:
             self.session = self.client.report_session_start(
                 logical_id=slash.context.session.id,
                 parent_logical_id=parent_logical_id,
+                is_parent_session=is_parent_session,
+                child_id=child_id,
                 total_num_tests=slash.context.session.get_total_num_tests(),
                 hostname=socket.getfqdn(),
                 keepalive_interval=self._keepalive_interval,
@@ -122,7 +148,12 @@ class BackslashPlugin(PluginInterface):
             self.client.api.call.add_label(session_id=self.session.id, label=label)
 
         if self._keepalive_interval is not None:
-            self._keepalive_thread = KeepaliveThread(self.client, self.session, self._keepalive_interval)
+            self._keepalive_thread = KeepaliveThread(
+                self.client,
+                self.session,
+                self._keepalive_interval,
+                error_callback=self._handle_keepalive_exception
+            )
             self._keepalive_thread.start()
 
     def _get_initial_session_metadata(self):
@@ -134,9 +165,7 @@ class BackslashPlugin(PluginInterface):
             'process_id': os.getpid(),
         }
 
-        for environment_key, environment_value in os.environ.items():
-            if environment_key.startswith(_ENV_VARIABLE_METADATA_PREFIX):
-                returned[environment_key[len(_ENV_VARIABLE_METADATA_PREFIX):]] = environment_value
+        add_environment_variable_metadata(metadata=returned)
         return returned
 
     def _get_extra_session_start_kwargs(self):
@@ -184,7 +213,7 @@ class BackslashPlugin(PluginInterface):
             while tests_count < len(tests_metadata):
                 self.session.report_upcoming_tests(tests_metadata[tests_count:tests_count+batch_size])
                 tests_count += batch_size
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPError:
             _logger.error('Ignoring exception while reporting planned tests', exc_info=True)
 
     @handle_exceptions
@@ -202,12 +231,22 @@ class BackslashPlugin(PluginInterface):
                 },
             }
 
+        log_path = slash.context.result.get_log_path()
+        if log_path:
+            kwargs.setdefault('metadata', {})['local_log_path'] = os.path.abspath(log_path)
+
         self.current_test = self.session.report_test_start(
             test_logical_id=slash.context.test.__slash__.id,
             test_index=slash.context.test.__slash__.test_index1,
             **kwargs
         )
         self._error_containers[slash.context.test.__slash__.id] = self.current_test
+
+    @slash.plugins.register_if(_HAS_TEST_DISTRIBUTED)
+    @handle_exceptions #pylint: disable=unused-argument
+    def test_distributed(self, test_logical_id, worker_session_id): #pylint: disable=unused-argument
+        if 'report_test_distributed' in self.client.api.info().endpoints:
+            self.current_test = self.session.report_test_distributed(test_logical_id)
 
     @handle_exceptions
     def test_skip(self, reason=None):
@@ -226,7 +265,7 @@ class BackslashPlugin(PluginInterface):
     @handle_exceptions
     @slash.plugins.registers_on(None)
     def get_tests_to_resume(self, session_id):
-        params = {'session_id':session_id, 'show_successful':'false'}
+        params = {'session_id':session_id, 'show_successful':'false', 'show_planned':'true'}
         max_retries = 3
         for i in range(max_retries):
             try:
@@ -318,10 +357,6 @@ class BackslashPlugin(PluginInterface):
             return
 
         details = {}
-        log_path = slash.context.result.get_log_path()
-
-        if log_path:
-            details['local_log_path'] = os.path.abspath(log_path)
 
         if hasattr(slash.context.result, 'details'):
             additional = slash.context.result.details.all()
@@ -337,7 +372,13 @@ class BackslashPlugin(PluginInterface):
         try:
             if self._keepalive_thread is not None:
                 self._keepalive_thread.stop()
-            self.session.report_end()
+
+            kwargs = {}
+            session_results = getattr(slash.session, 'results', None)
+            has_fatal_errors = hasattr(session_results, 'has_fatal_errors') and session_results.has_fatal_errors()
+            if self.client.api.info().endpoints.report_session_end.version >= 2:
+                kwargs['has_fatal_errors'] = has_fatal_errors
+            self.session.report_end(**kwargs)
         except Exception:       # pylint: disable=broad-except
             _logger.error('Exception ignored in session_end', exc_info=True)
 
@@ -352,9 +393,15 @@ class BackslashPlugin(PluginInterface):
             _logger.debug('Could not determine error container to report on for {}', result)
             return
 
-        kwargs = {'message': str(error.exception) if not error.message else error.message,
-                  'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
-                  'traceback': distill_slash_traceback(error)}
+        kwargs = {'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
+                  'traceback': distill_slash_traceback(error), 'exception_attrs': getattr(error, 'exception_attributes', NOTHING)}
+        if error.message:
+            message = error.message
+        elif hasattr(error, 'exception_str'):
+            message = error.exception_str
+        else:
+            message = str(error.exception)
+        kwargs['message'] = message
 
         for compact_variables in [False, True]:
             if compact_variables:

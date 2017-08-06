@@ -1,1 +1,3 @@
-__version__ = '2.28.6'
+import pkg_resources
+
+__version__ = pkg_resources.get_distribution('backslash').version

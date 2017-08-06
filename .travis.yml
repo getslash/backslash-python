@@ -1,15 +1,13 @@
 language: python
 python:
 - 2.7
-- 3.3
-- 3.4
 - 3.5
 - 3.6
 install:
 - pip install -U pip setuptools
-- pip install -r test_requirements.txt
-- pip install -e .
+- pip install -e .[testing]
 script:
+- pylint -j $(nproc) --rcfile=.pylintrc backslash tests
 - py.test tests
 deploy:
   provider: pypi

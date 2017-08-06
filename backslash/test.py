@@ -36,3 +36,6 @@ class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commenta
 
     def get_session(self):
         return self.client.api.get('/rest/sessions/{0}'.format(self.session_id))
+
+    def get_parent(self):
+        return self.get_session()
