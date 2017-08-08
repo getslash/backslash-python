@@ -79,10 +79,22 @@ class BackslashPlugin(PluginInterface):
 
     @property
     def webapp_url(self):
+        return self._url_with_fragment('/')
+
+    @property
+    def session_webapp_url(self):
+        session = slash.context.session
+        if session is None:
+            return None
+        return self._url_with_fragment('sessions/{}'.format(session.id))
+
+    def _url_with_fragment(self, fragment):
         returned = str(self._get_backslash_url())
         if not returned.endswith('/'):
             returned += '/'
-        returned += '#/'
+        if not fragment.startswith('/'):
+            fragment = '/' + fragment
+        returned += '#{}'.format(fragment)
         return returned
 
     def _handle_exception(self, exc_info):

@@ -40,6 +40,16 @@ def test_webapp_url(installed_plugin, server_url):
     expected += '#/'
     assert installed_plugin.webapp_url == expected
 
+def test_session_webapp_url_no_session(installed_plugin):
+    assert installed_plugin.session_webapp_url is None
+
+def test_session_webapp_url_with_session(installed_plugin, server_url):
+    with slash.Session() as s:
+        url = installed_plugin.session_webapp_url
+    assert url == '{}/#/sessions/{}'.format(server_url, s.id)
+
+
+
 
 
 @pytest.fixture
