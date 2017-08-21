@@ -27,8 +27,9 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
         self.client.api.call_function('send_keepalive', {'session_id': self.id})
 
     def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING,
-                          file_hash=NOTHING, scm_revision=NOTHING, scm_dirty=NOTHING, is_interactive=NOTHING,
-                          variation=NOTHING, metadata=NOTHING, test_index=NOTHING, parameters=NOTHING):
+                          file_hash=NOTHING,
+                          scm_revision=NOTHING, scm_dirty=NOTHING, scm_local_branch=NOTHING, scm_remote_branch=NOTHING,
+                          is_interactive=NOTHING, variation=NOTHING, metadata=NOTHING, test_index=NOTHING, parameters=NOTHING):
 
         params = {
             'session_id': self.id,
@@ -37,6 +38,8 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
             'file_hash': file_hash,
             'scm_revision': scm_revision,
             'scm_dirty': scm_dirty,
+            'scm_local_branch': scm_local_branch,
+            'scm_remote_branch': scm_remote_branch,
             'class_name': class_name,
             'file_name': file_name,
             'is_interactive': is_interactive,

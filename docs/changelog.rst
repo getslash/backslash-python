@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :feature:`51` Report local and remote SCM branches if supported
 * :release: `2.30.0 <8-8-2017>`
 * :feature:`50` Added session_webapp_url property to the Slash plugin
 * :release:`2.29.0 <6-8-2017>`
