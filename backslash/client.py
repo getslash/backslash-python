@@ -45,6 +45,7 @@ class Backslash(object):
                              keepalive_interval=NOTHING,
                              subjects=NOTHING,
                              infrastructure=NOTHING,
+                             ttl_seconds=NOTHING,
     ):
         """Reports a new session starting
 
@@ -59,6 +60,7 @@ class Backslash(object):
             'keepalive_interval': keepalive_interval,
             'subjects': subjects,
             'infrastructure': infrastructure,
+            'ttl_seconds': ttl_seconds,
         }
         if parent_logical_id is not None or is_parent_session:
             supports_parallel = (self.api.info().endpoints.report_session_start.version >= 2)
