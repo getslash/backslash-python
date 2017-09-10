@@ -111,6 +111,11 @@ class BackslashPlugin(PluginInterface):
 
     def get_config(self):
         return {
+            "session_ttl_days": 0 // Doc(
+                'Optional number of days after which this session will be discarded '
+                'from Backslash') // Cmdline(arg='--session-ttl-days', metavar='DAYS'),
+
+
             "session_labels": [] // Doc('Specify labels to be added to the session when reported') \
                                  // Cmdline(append="--session-label", metavar="LABEL"),
         }
@@ -181,7 +186,11 @@ class BackslashPlugin(PluginInterface):
         return returned
 
     def _get_extra_session_start_kwargs(self):
-        return {}
+        returned = {}
+        ttl_seconds = slash_config.root.plugin_config.backslash.session_ttl_days * 24 * 60 * 60
+        if ttl_seconds:
+            returned['ttl_seconds'] = ttl_seconds
+        return returned
 
     @slash.plugins.register_if(_HAS_TEST_AVOIDED)
     @handle_exceptions
@@ -332,6 +341,11 @@ class BackslashPlugin(PluginInterface):
                 hexsha = None
             test_info['scm_revision'] = hexsha
             test_info['scm_dirty'] = bool(repo.untracked_files or repo.index.diff(None) or repo.index.diff(repo.head.commit))
+            if self.client.api.info().endpoints.report_test_start.version >= 3:
+                test_info['scm_local_branch'] = repo.active_branch.name
+                tracking_branch = repo.active_branch.tracking_branch()
+                if tracking_branch is not None:
+                    test_info['scm_remote_branch'] = tracking_branch.name
         except Exception: # pylint: disable=broad-except
             _logger.warning('Error when obtaining SCM information', exc_info=True)
 
