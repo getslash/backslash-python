@@ -1,7 +1,6 @@
 import collections
 import itertools
 
-import requests
 from sentinels import NOTHING
 
 from ._compat import iteritems
@@ -69,7 +68,7 @@ class LazyQuery(object):
 
     def _fetch_page(self, page_index):
         assert page_index != 0
-        response = requests.get(self._url.add_query_param(
+        response = self._client.api.session.get(self._url.add_query_param(
             'page', str(page_index)).add_query_param('page_size', str(self._page_size)))
         raise_for_status(response)
         response_data = response.json()
