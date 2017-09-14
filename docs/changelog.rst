@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :release:`2.31.2 <14-9-2017>`
 * :bug:`54` Handle cases of detached head correctly when deducing local branch
 * :release:`2.31.1 <11-9-2017>`
 * :bug:`53` Use api session when constructing lazy queries
