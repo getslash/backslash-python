@@ -342,10 +342,11 @@ class BackslashPlugin(PluginInterface):
             test_info['scm_revision'] = hexsha
             test_info['scm_dirty'] = bool(repo.untracked_files or repo.index.diff(None) or repo.index.diff(repo.head.commit))
             if self.client.api.info().endpoints.report_test_start.version >= 3:
-                test_info['scm_local_branch'] = repo.active_branch.name
-                tracking_branch = repo.active_branch.tracking_branch()
-                if tracking_branch is not None:
-                    test_info['scm_remote_branch'] = tracking_branch.name
+                if not repo.head.is_detached:
+                    test_info['scm_local_branch'] = repo.active_branch.name
+                    tracking_branch = repo.active_branch.tracking_branch()
+                    if tracking_branch is not None:
+                        test_info['scm_remote_branch'] = tracking_branch.name
         except Exception: # pylint: disable=broad-except
             _logger.warning('Error when obtaining SCM information', exc_info=True)
 
