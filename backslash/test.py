@@ -36,3 +36,6 @@ class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commenta
 
     def get_parent(self):
         return self.get_session()
+
+    def update_status_description(self, description):
+        return self.client.api.call_function('update_status_description', {'test_id': self.id, 'description': description})
