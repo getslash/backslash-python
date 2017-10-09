@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :feature:`58` Support reporting timing metrics
 * :feature:`57` Support reporting test status description
 * :release:`2.31.2 <14-9-2017>`
 * :bug:`54` Handle cases of detached head correctly when deducing local branch

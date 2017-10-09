@@ -7,9 +7,10 @@ from .related_entity_container import RelatedEntityContainer
 from .warning_container import WarningContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
+from .timing_container import TimingContainer
 
 
-class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commentable, RelatedEntityContainer):
+class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commentable, RelatedEntityContainer, TimingContainer):
 
     @property
     def ui_url(self):
