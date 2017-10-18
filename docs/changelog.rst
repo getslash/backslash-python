@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :feature:`60` Clean up UI URL generation, added ``Backslash.get_ui_url`` helper method
 * :feature:`58` Support reporting timing metrics
 * :feature:`57` Support reporting test status description
 * :release:`2.31.2 <14-9-2017>`

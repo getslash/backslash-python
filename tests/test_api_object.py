@@ -49,9 +49,9 @@ def test_ui_url(client, object_type, logical_id, use_logical):
     url = obj.ui_url
     display_id = logical_id if use_logical else id
     if object_type is test.Test:
-        assert url == client.url + '#/sessions/{}/tests/{}'.format(data['session_display_id'], display_id)
+        assert url == client.url + '/#/sessions/{}/tests/{}'.format(data['session_display_id'], display_id)
     else:
-        assert url == client.url + '#/{}s/{}'.format(object_type.__name__.lower(), display_id)
+        assert url == client.url + '/#/{}s/{}'.format(object_type.__name__.lower(), display_id)
 
 
 @pytest.fixture

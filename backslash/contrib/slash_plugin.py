@@ -60,7 +60,7 @@ def handle_exceptions(func):
 
 class BackslashPlugin(PluginInterface):
 
-    current_test = session = None
+    client = current_test = session = None
 
     def __init__(self, url=None, keepalive_interval=None, runtoken=None, propagate_exceptions=False):
         super(BackslashPlugin, self).__init__()
@@ -75,27 +75,22 @@ class BackslashPlugin(PluginInterface):
 
     @property
     def rest_url(self):
-        return URL(self._get_backslash_url()).add_path('rest')
+        if self.client is None:
+            return None
+        return self.client.url.add_path('rest')
 
     @property
     def webapp_url(self):
-        return self._url_with_fragment('/')
+        if self.client is None:
+            return None
+        return self.client.get_ui_url()
 
     @property
     def session_webapp_url(self):
         session = slash.context.session
-        if session is None:
+        if session is None or self.client is None:
             return None
-        return self._url_with_fragment('sessions/{}'.format(session.id))
-
-    def _url_with_fragment(self, fragment):
-        returned = str(self._get_backslash_url())
-        if not returned.endswith('/'):
-            returned += '/'
-        if not fragment.startswith('/'):
-            fragment = '/' + fragment
-        returned += '#{}'.format(fragment)
-        return returned
+        return self.client.get_ui_url('sessions/{}'.format(session.id))
 
     def _handle_exception(self, exc_info):
         pass

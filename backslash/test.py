@@ -14,7 +14,7 @@ class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commenta
 
     @property
     def ui_url(self):
-        return self.client.url + '#/sessions/{}/tests/{}'.format(self.session_display_id, self.logical_id or self.id)
+        return self.client.get_ui_url('sessions/{}/tests/{}'.format(self.session_display_id, self.logical_id or self.id))
 
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_test_end', {'id': self.id, 'duration': duration})

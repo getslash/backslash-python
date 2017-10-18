@@ -17,7 +17,7 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
 
     @property
     def ui_url(self):
-        return self.client.url + '#/sessions/{}'.format(self.logical_id or self.id)
+        return self.client.get_ui_url('/sessions/{}'.format(self.logical_id or self.id))
 
     def report_end(self, duration=NOTHING, has_fatal_errors=NOTHING):
 
