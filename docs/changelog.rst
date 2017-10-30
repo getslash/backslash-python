@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :release:`2.32.0 <30-10-2017>`
 * :feature:`60` Clean up UI URL generation, added ``Backslash.get_ui_url`` helper method
 * :feature:`59` Support reporting interruption exceptions to Backslash
 * :feature:`58` Support reporting timing metrics
