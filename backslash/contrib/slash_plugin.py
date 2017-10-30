@@ -60,7 +60,7 @@ def handle_exceptions(func):
 
 class BackslashPlugin(PluginInterface):
 
-    current_test = session = None
+    client = current_test = session = None
 
     def __init__(self, url=None, keepalive_interval=None, runtoken=None, propagate_exceptions=False):
         super(BackslashPlugin, self).__init__()
@@ -75,27 +75,22 @@ class BackslashPlugin(PluginInterface):
 
     @property
     def rest_url(self):
-        return URL(self._get_backslash_url()).add_path('rest')
+        if self.client is None:
+            return None
+        return self.client.url.add_path('rest')
 
     @property
     def webapp_url(self):
-        return self._url_with_fragment('/')
+        if self.client is None:
+            return None
+        return self.client.get_ui_url()
 
     @property
     def session_webapp_url(self):
         session = slash.context.session
-        if session is None:
+        if session is None or self.client is None:
             return None
-        return self._url_with_fragment('sessions/{}'.format(session.id))
-
-    def _url_with_fragment(self, fragment):
-        returned = str(self._get_backslash_url())
-        if not returned.endswith('/'):
-            returned += '/'
-        if not fragment.startswith('/'):
-            fragment = '/' + fragment
-        returned += '#{}'.format(fragment)
-        return returned
+        return self.client.get_ui_url('sessions/{}'.format(session.id))
 
     def _handle_exception(self, exc_info):
         pass
@@ -198,6 +193,7 @@ class BackslashPlugin(PluginInterface):
         self.test_start()
         self.test_skip(reason=reason)
         self.test_end()
+
 
     @handle_exceptions
     def test_interrupt(self):
@@ -411,6 +407,20 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     def error_added(self, result, error):
+        self._add_exception(result=result, exception=error)
+
+    @slash.plugins.register_if(hasattr(slash.hooks, 'interruption_added'))
+    @handle_exceptions
+    def interruption_added(self, result, exception):
+        self._add_exception(result=result, exception=exception, is_interruption=True)
+
+
+    def _add_exception(self, result, exception, is_interruption=False):
+        has_interruptions = self.client.api.info().endpoints.add_error.version >= 4
+        if is_interruption and not has_interruptions:
+            _logger.debug('Server does not support recording is_interruption exceptions. Skipping reporting')
+            return
+
         if result is slash.session.results.global_result:
             error_container = self.session
         else:
@@ -420,15 +430,20 @@ class BackslashPlugin(PluginInterface):
             _logger.debug('Could not determine error container to report on for {}', result)
             return
 
-        kwargs = {'exception_type': error.exception_type.__name__ if error.exception_type is not None else None,
-                  'traceback': distill_slash_traceback(error), 'exception_attrs': getattr(error, 'exception_attributes', NOTHING)}
-        if error.message:
-            message = error.message
-        elif hasattr(error, 'exception_str'):
-            message = error.exception_str
+        kwargs = {'exception_type': exception.exception_type.__name__ if exception.exception_type is not None else None,
+                  'traceback': distill_slash_traceback(exception), 'exception_attrs': getattr(exception, 'exception_attributes', NOTHING)}
+        if exception.message:
+            message = exception.message
+        elif hasattr(exception, 'exception_str'):
+            message = exception.exception_str
         else:
-            message = str(error.exception)
+            message = str(exception.exception)
+
+
         kwargs['message'] = message
+
+        if has_interruptions:
+            kwargs['is_interruption'] = is_interruption
 
         for compact_variables in [False, True]:
             if compact_variables:

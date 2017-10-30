@@ -9,14 +9,15 @@ from .related_entity_container import RelatedEntityContainer
 from .warning_container import WarningContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
+from .timing_container import TimingContainer
 
 APPEND_UPCOMING_TESTS_STR = 'append_upcoming_tests'
 
-class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archiveable, Commentable, RelatedEntityContainer):
+class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archiveable, Commentable, RelatedEntityContainer, TimingContainer):
 
     @property
     def ui_url(self):
-        return self.client.url + '#/sessions/{}'.format(self.logical_id or self.id)
+        return self.client.get_ui_url('/sessions/{}'.format(self.logical_id or self.id))
 
     def report_end(self, duration=NOTHING, has_fatal_errors=NOTHING):
 

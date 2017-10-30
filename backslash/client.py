@@ -25,6 +25,18 @@ class Backslash(object):
     def url(self):
         return self._url
 
+    def get_ui_url(self, fragment=None):
+        returned = str(self.url)
+        if not returned.endswith('/'):
+            returned += '/'
+        if not fragment:
+            fragment = '/'
+        elif not fragment.startswith('/'):
+            fragment = '/' + fragment
+        returned += '#{}'.format(fragment)
+        return returned
+
+
     def toggle_user_role(self, user_id, role):
         return self.api.call_function('toggle_user_role', {'user_id': user_id, 'role': role})
 

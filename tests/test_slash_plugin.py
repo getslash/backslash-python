@@ -31,25 +31,26 @@ def test_exception_distilling_surrounding_code(traceback):
 
 
 def test_rest_url(installed_plugin, server_url):
+    installed_plugin.activate()
     assert installed_plugin.rest_url == server_url.add_path('rest')
 
 def test_webapp_url(installed_plugin, server_url):
+    installed_plugin.activate()
     expected = server_url
     if not expected.endswith('/'):
         expected += '/'
     expected += '#/'
     assert installed_plugin.webapp_url == expected
 
+
 def test_session_webapp_url_no_session(installed_plugin):
     assert installed_plugin.session_webapp_url is None
 
 def test_session_webapp_url_with_session(installed_plugin, server_url):
+    installed_plugin.activate()
     with slash.Session() as s:
         url = installed_plugin.session_webapp_url
     assert url == '{}/#/sessions/{}'.format(server_url, s.id)
-
-
-
 
 
 @pytest.fixture
@@ -75,7 +76,7 @@ def error_result():
 @pytest.fixture
 def installed_plugin(request, server_url):
     from backslash.contrib import slash_plugin
-    plugin = slash_plugin.BackslashPlugin(url=str(server_url))
+    plugin = slash_plugin.BackslashPlugin(url=str(server_url), runtoken='blap')
 
     @request.addfinalizer
     def cleanup():              # pylint: disable=unused-variable
