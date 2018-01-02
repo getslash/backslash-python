@@ -1,6 +1,8 @@
 Changelog
 =========
 
+* :release:`2.33.0 <2-1-2018>`
+* :feature:`61` The Slash plugin now serializes variables based on its own logic, and not Slash's. This is more future-proof, as Slash is going to deprecate this information in the upcoming release
 * :release:`2.32.0 <30-10-2017>`
 * :feature:`60` Clean up UI URL generation, added ``Backslash.get_ui_url`` helper method
 * :feature:`59` Support reporting interruption exceptions to Backslash
