@@ -286,7 +286,7 @@ class BackslashPlugin(PluginInterface):
         max_retries = 3
         for i in range(max_retries):
             try:
-                return LazyQuery(self.client, '/rest/tests', query_params=params).all()
+                return reversed(LazyQuery(self.client, '/rest/tests', query_params=params).all())
             except HTTPError:
                 if i == max_retries-1:
                     raise
