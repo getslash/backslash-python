@@ -1,6 +1,8 @@
 Changelog
 =========
 
+* :release:`2.33.1 <30-1-2018>`
+* :bug:`63` Avoid accidental deprecation when examining exception attributes
 * :release:`2.33.0 <2-1-2018>`
 * :feature:`61` The Slash plugin now serializes variables based on its own logic, and not Slash's. This is more future-proof, as Slash is going to deprecate this information in the upcoming release
 * :release:`2.32.0 <30-10-2017>`

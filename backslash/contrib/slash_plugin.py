@@ -12,6 +12,7 @@ import webbrowser
 
 import logbook
 import requests
+import vintage
 
 try:
     import git
@@ -430,7 +431,9 @@ class BackslashPlugin(PluginInterface):
             _logger.debug('Could not determine error container to report on for {}', result)
             return
 
-        exception_attrs = getattr(exception, 'exception_attributes', NOTHING)
+        with vintage.get_no_deprecations_context():
+            exception_attrs = getattr(exception, 'exception_attributes', NOTHING)
+
         if exception_attrs is NOTHING and hasattr(exception, 'exc_info'):
             exception_attrs = distill_object_attributes(exception.exc_info[1])
         kwargs = {'exception_type': exception.exception_type.__name__ if exception.exception_type is not None else None,
