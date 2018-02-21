@@ -282,8 +282,8 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     @slash.plugins.registers_on(None)
-    def get_tests_to_resume(self, session_id):
-        params = {'session_id':session_id, 'show_successful':'false', 'show_planned':'true'}
+    def get_tests_to_resume(self, session_id, get_successful=False):
+        params = {'session_id':session_id, 'show_successful':get_successful, 'show_planned':'true'}
         max_retries = 3
         for i in range(max_retries):
             try:
