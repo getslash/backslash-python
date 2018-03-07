@@ -114,6 +114,8 @@ class BackslashPlugin(PluginInterface):
 
             "session_labels": [] // Doc('Specify labels to be added to the session when reported') \
                                  // Cmdline(append="--session-label", metavar="LABEL"),
+            "blacklisted_warnings_category": [] // Doc(
+                'Specify warnings categories which should not be reported to backslash'),
         }
 
 
@@ -157,7 +159,7 @@ class BackslashPlugin(PluginInterface):
         except Exception: # pylint: disable=broad-except
             raise
 
-        for label in slash_config.root.plugin_config.backslash.session_labels:
+        for label in self.current_config.session_labels:
             self.client.api.call.add_label(session_id=self.session.id, label=label)
 
         if self._keepalive_interval is not None:
@@ -183,7 +185,7 @@ class BackslashPlugin(PluginInterface):
 
     def _get_extra_session_start_kwargs(self):
         returned = {}
-        ttl_seconds = slash_config.root.plugin_config.backslash.session_ttl_days * 24 * 60 * 60
+        ttl_seconds = self.current_config.session_ttl_days * 24 * 60 * 60
         if ttl_seconds:
             returned['ttl_seconds'] = ttl_seconds
         return returned
@@ -467,6 +469,8 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     def warning_added(self, warning):
+        if any(issubclass(warning.category, b_cls) for b_cls in self.current_config.blacklisted_warnings_category):
+            return
         kwargs = {'message': warning.message, 'filename': warning.filename, 'lineno': warning.lineno}
         warning_obj = self.current_test if self.current_test is not None else self.session
         if warning_obj is not None:
