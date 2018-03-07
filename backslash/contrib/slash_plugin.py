@@ -105,7 +105,7 @@ class BackslashPlugin(PluginInterface):
     def get_name(self):
         return 'backslash'
 
-    def get_config(self):
+    def get_default_config(self):
         return {
             "session_ttl_days": 0 // Doc(
                 'Optional number of days after which this session will be discarded '
