@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :feature:`68` Support blacklisting warning categories from being reported to backslash
 * :release:`2.33.1 <30-1-2018>`
 * :bug:`63` Avoid accidental deprecation when examining exception attributes
 * :release:`2.33.0 <2-1-2018>`
