@@ -36,7 +36,7 @@ from ..lazy_query import LazyQuery
 from ..session import APPEND_UPCOMING_TESTS_STR
 from ..__version__ import __version__ as BACKSLASH_CLIENT_VERSION
 
-_CONFIG_FILE = os.path.expanduser('~/.backslash/config.json')
+_DEFAULT_CONFIG_FILENAME = os.path.expanduser('~/.backslash/config.json')
 
 _logger = logbook.Logger(__name__)
 
@@ -63,10 +63,12 @@ class BackslashPlugin(PluginInterface):
 
     client = current_test = session = None
 
-    def __init__(self, url=None, keepalive_interval=None, runtoken=None, propagate_exceptions=False):
+    def __init__(self, url=None, keepalive_interval=None, runtoken=None,
+                 propagate_exceptions=False, config_filename=_DEFAULT_CONFIG_FILENAME):
         super(BackslashPlugin, self).__init__()
         self._url = url
         self._repo_cache = {}
+        self._config_filename = config_filename
         self._file_hash_cache = {}
         self._keepalive_interval = keepalive_interval
         self._keepalive_thread = None
@@ -105,7 +107,7 @@ class BackslashPlugin(PluginInterface):
     def get_name(self):
         return 'backslash'
 
-    def get_config(self):
+    def get_default_config(self):
         return {
             "session_ttl_days": 0 // Doc(
                 'Optional number of days after which this session will be discarded '
@@ -114,6 +116,8 @@ class BackslashPlugin(PluginInterface):
 
             "session_labels": [] // Doc('Specify labels to be added to the session when reported') \
                                  // Cmdline(append="--session-label", metavar="LABEL"),
+            "blacklisted_warnings_category": [] // Doc(
+                'Specify warnings categories which should not be reported to backslash'),
         }
 
 
@@ -157,7 +161,7 @@ class BackslashPlugin(PluginInterface):
         except Exception: # pylint: disable=broad-except
             raise
 
-        for label in slash_config.root.plugin_config.backslash.session_labels:
+        for label in self.current_config.session_labels:
             self.client.api.call.add_label(session_id=self.session.id, label=label)
 
         if self._keepalive_interval is not None:
@@ -183,7 +187,7 @@ class BackslashPlugin(PluginInterface):
 
     def _get_extra_session_start_kwargs(self):
         returned = {}
-        ttl_seconds = slash_config.root.plugin_config.backslash.session_ttl_days * 24 * 60 * 60
+        ttl_seconds = self.current_config.session_ttl_days * 24 * 60 * 60
         if ttl_seconds:
             returned['ttl_seconds'] = ttl_seconds
         return returned
@@ -282,12 +286,12 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     @slash.plugins.registers_on(None)
-    def get_tests_to_resume(self, session_id):
-        params = {'session_id':session_id, 'show_successful':'false', 'show_planned':'true'}
+    def get_tests_to_resume(self, session_id, get_successful=False):
+        params = {'session_id':session_id, 'show_successful':get_successful, 'show_planned':'true'}
         max_retries = 3
         for i in range(max_retries):
             try:
-                return LazyQuery(self.client, '/rest/tests', query_params=params).all()
+                return reversed(LazyQuery(self.client, '/rest/tests', query_params=params).all())
             except HTTPError:
                 if i == max_retries-1:
                     raise
@@ -467,6 +471,8 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     def warning_added(self, warning):
+        if any(issubclass(warning.category, b_cls) for b_cls in self.current_config.blacklisted_warnings_category):
+            return
         kwargs = {'message': warning.message, 'filename': warning.filename, 'lineno': warning.lineno}
         warning_obj = self.current_test if self.current_test is not None else self.session
         if warning_obj is not None:
@@ -500,13 +506,13 @@ class BackslashPlugin(PluginInterface):
         return self._get_config().get('run_tokens', {})
 
     def _get_config(self):
-        if not os.path.isfile(_CONFIG_FILE):
+        if not os.path.isfile(self._config_filename):
             return {}
-        with open(_CONFIG_FILE) as f:
+        with open(self._config_filename) as f:
             return json.load(f)
 
     def _save_token(self, token):
-        tmp_filename = _CONFIG_FILE + '.tmp'
+        tmp_filename = self._config_filename + '.tmp'
         cfg = self._get_config()
         cfg.setdefault('run_tokens', {})[self._get_backslash_url()] = token
 
@@ -514,7 +520,7 @@ class BackslashPlugin(PluginInterface):
 
         with open(tmp_filename, 'w') as f:
             json.dump(cfg, f, indent=2)
-        os.rename(tmp_filename, _CONFIG_FILE)
+        os.rename(tmp_filename, self._config_filename)
 
     @registers_on(None)
     def fetch_token(self, username, password):

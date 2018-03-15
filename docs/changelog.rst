@@ -1,6 +1,9 @@
 Changelog
 =========
 
+* :release:`2.34.0 <15-3-2018>`
+* :feature:`70` Configuration filename for the bundled Slash plugin can now be controlled through a constructor argument
+* :feature:`68` Support blacklisting warning categories from being reported to backslash
 * :release:`2.33.1 <30-1-2018>`
 * :bug:`63` Avoid accidental deprecation when examining exception attributes
 * :release:`2.33.0 <2-1-2018>`
