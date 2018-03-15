@@ -36,7 +36,7 @@ from ..lazy_query import LazyQuery
 from ..session import APPEND_UPCOMING_TESTS_STR
 from ..__version__ import __version__ as BACKSLASH_CLIENT_VERSION
 
-_CONFIG_FILE = os.path.expanduser('~/.backslash/config.json')
+_DEFAULT_CONFIG_FILENAME = os.path.expanduser('~/.backslash/config.json')
 
 _logger = logbook.Logger(__name__)
 
@@ -63,10 +63,12 @@ class BackslashPlugin(PluginInterface):
 
     client = current_test = session = None
 
-    def __init__(self, url=None, keepalive_interval=None, runtoken=None, propagate_exceptions=False):
+    def __init__(self, url=None, keepalive_interval=None, runtoken=None,
+                 propagate_exceptions=False, config_filename=_DEFAULT_CONFIG_FILENAME):
         super(BackslashPlugin, self).__init__()
         self._url = url
         self._repo_cache = {}
+        self._config_filename = config_filename
         self._file_hash_cache = {}
         self._keepalive_interval = keepalive_interval
         self._keepalive_thread = None
@@ -504,13 +506,13 @@ class BackslashPlugin(PluginInterface):
         return self._get_config().get('run_tokens', {})
 
     def _get_config(self):
-        if not os.path.isfile(_CONFIG_FILE):
+        if not os.path.isfile(self._config_filename):
             return {}
-        with open(_CONFIG_FILE) as f:
+        with open(self._config_filename) as f:
             return json.load(f)
 
     def _save_token(self, token):
-        tmp_filename = _CONFIG_FILE + '.tmp'
+        tmp_filename = self._config_filename + '.tmp'
         cfg = self._get_config()
         cfg.setdefault('run_tokens', {})[self._get_backslash_url()] = token
 
@@ -518,7 +520,7 @@ class BackslashPlugin(PluginInterface):
 
         with open(tmp_filename, 'w') as f:
             json.dump(cfg, f, indent=2)
-        os.rename(tmp_filename, _CONFIG_FILE)
+        os.rename(tmp_filename, self._config_filename)
 
     @registers_on(None)
     def fetch_token(self, username, password):
