@@ -316,7 +316,10 @@ class BackslashPlugin(PluginInterface):
                 }
         variation = getattr(test.__slash__, 'variation', None)
         if variation:
-            if hasattr(test.__slash__.variation, 'id'):
+            if hasattr(test.__slash__.variation, 'labels'):
+                items = test.__slash__.variation.labels.items()
+                returned['parameters'] = variation.values.copy()
+            elif hasattr(test.__slash__.variation, 'id'):
                 items = test.__slash__.variation.id.items()
                 returned['parameters'] = variation.values.copy()
             else:
