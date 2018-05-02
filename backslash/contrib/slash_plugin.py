@@ -5,6 +5,7 @@ import hashlib
 import itertools
 import json
 import os
+import pkg_resources
 import socket
 import sys
 import time
@@ -297,7 +298,8 @@ class BackslashPlugin(PluginInterface):
                     raise
 
     def _get_test_info(self, test):
-        if test.__slash__.is_interactive():
+        if test.__slash__.is_interactive() and \
+           pkg_resources.parse_version(slash.__version__) < pkg_resources.parse_version('1.6.0'):
             returned = {
                 'file_name': '<interactive>',
                 'class_name': '<interactive>',
@@ -313,6 +315,7 @@ class BackslashPlugin(PluginInterface):
                 'file_name': normalize_file_path(test.__slash__.file_path),
                 'class_name': test.__slash__.class_name,
                 'name': test_display_name,
+                'is_interactive': test.__slash__.is_interactive(),
                 }
         variation = getattr(test.__slash__, 'variation', None)
         if variation:
