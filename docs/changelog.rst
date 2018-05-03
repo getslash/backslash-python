@@ -1,6 +1,9 @@
 Changelog
 =========
 
+* :release:`2.35.0 <3-5-2018>`
+* :feature:`73` Report parameter labels if available
+* :feature:`-` Small improvement to how interactive tests get reported
 * :release:`2.34.0 <15-3-2018>`
 * :feature:`70` Configuration filename for the bundled Slash plugin can now be controlled through a constructor argument
 * :feature:`68` Support blacklisting warning categories from being reported to backslash
