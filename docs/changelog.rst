@@ -1,6 +1,8 @@
 Changelog
 =========
 
+* :release:`2.36.0 <7-5-2018>`
+* :feature:`72` Avoid reporting session_start once a session already exists
 * :release:`2.35.0 <3-5-2018>`
 * :feature:`73` Report parameter labels if available
 * :feature:`-` Small improvement to how interactive tests get reported
