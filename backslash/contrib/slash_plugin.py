@@ -133,8 +133,7 @@ class BackslashPlugin(PluginInterface):
             self._keepalive_thread.stop()
         super(BackslashPlugin, self).deactivate()
 
-    @handle_exceptions
-    def session_start(self):
+    def _notify_session_start(self):
         metadata = self._get_initial_session_metadata()
         is_parent_session = False
         parent_logical_id = child_id = None
@@ -146,21 +145,18 @@ class BackslashPlugin(PluginInterface):
             else:
                 is_parent_session = True
 
-        try:
-            self.session = self.client.report_session_start(
-                logical_id=slash.context.session.id,
-                parent_logical_id=parent_logical_id,
-                is_parent_session=is_parent_session,
-                child_id=child_id,
-                total_num_tests=slash.context.session.get_total_num_tests(),
-                hostname=socket.getfqdn(),
-                keepalive_interval=self._keepalive_interval,
-                infrastructure='slash',
-                metadata=metadata,
-                **self._get_extra_session_start_kwargs()
-            )
-        except Exception: # pylint: disable=broad-except
-            raise
+        self.session = self.client.report_session_start(
+            logical_id=slash.context.session.id,
+            parent_logical_id=parent_logical_id,
+            is_parent_session=is_parent_session,
+            child_id=child_id,
+            total_num_tests=slash.context.session.get_total_num_tests(),
+            hostname=socket.getfqdn(),
+            keepalive_interval=self._keepalive_interval,
+            infrastructure='slash',
+            metadata=metadata,
+            **self._get_extra_session_start_kwargs()
+        )
 
         for label in self.current_config.session_labels:
             self.client.api.call.add_label(session_id=self.session.id, label=label)
@@ -173,6 +169,11 @@ class BackslashPlugin(PluginInterface):
                 error_callback=self._handle_keepalive_exception
             )
             self._keepalive_thread.start()
+
+    @handle_exceptions
+    def session_start(self):
+        if self.session is None:
+            self._notify_session_start()
 
     def _get_initial_session_metadata(self):
         returned = {

@@ -12,3 +12,5 @@ htmlcov
 flycheck_*
 
 /.eggs
+AUTHORS
+ChangeLog
