@@ -8,9 +8,7 @@ from .warning_container import WarningContainer
 from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
 from .timing_container import TimingContainer
-import slash
 
-_UPDATE_PARAMETERS_FUNC = 'update_test_parameters'
 
 class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commentable, RelatedEntityContainer, TimingContainer):
 
@@ -26,18 +24,6 @@ class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commenta
 
     def report_interrupted(self):
         self.client.api.call_function('report_test_interrupted', {'id': self.id})
-
-    def update_parameters(self):
-        variation = getattr(slash.context.test.__slash__, 'variation', None)
-        if not variation or not _UPDATE_PARAMETERS_FUNC in self.client.api.info().endpoints:
-            return
-        updated_param_names = variation.get_computed_parameter_names()
-        if updated_param_names:
-            self.client.api.call_function(_UPDATE_PARAMETERS_FUNC,
-                                          {
-                                           'test_id': self.id,
-                                           'parameters': {param_name: variation.values[param_name] for param_name in updated_param_names}
-                                          })
 
     def query_errors(self):
         """Queries tests of the current session
