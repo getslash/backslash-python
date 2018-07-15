@@ -1,6 +1,8 @@
 Changelog
 =========
 
+* :release:`2.36.1 <15-7-2018>`
+* :feature:`77` backslash-python now honors Slash's blacklist for performing ``repr`` on traceback distilling, if available
 * :release:`2.36.0 <7-5-2018>`
 * :feature:`72` Avoid reporting session_start once a session already exists
 * :release:`2.35.0 <3-5-2018>`
