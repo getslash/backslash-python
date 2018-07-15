@@ -5,6 +5,11 @@ import types
 
 from .._compat import PY2
 
+try:
+    from slash import config as slash_config
+except ImportError:
+    slash_config = None
+
 
 _SPECIAL_DIRS = ('.git', '.hg', '.svn')
 
@@ -42,12 +47,23 @@ def _is_ipython_frame(frame):
     return 'ipython-input' in frame['filename'] and frame['lineno'] == 1
 
 def distill_object_attributes(obj, truncate=True):
+    repr_blacklisted_types = _get_repr_blacklisted_types()
 
-    return {attr: value if isinstance(value, _ALLOWED_ATTRIBUTE_TYPES) else _safe_repr(value, truncate=truncate)
+    return {attr: value
+            if isinstance(value, _ALLOWED_ATTRIBUTE_TYPES) else _safe_repr(value, repr_blacklisted_types, truncate=truncate)
             for attr, value in _iter_distilled_object_attributes(obj)}
 
+def _get_repr_blacklisted_types():
+    if slash_config is None:
+        return ()
+
+    log_config = slash_config.root.log
+    return getattr(log_config, 'repr_blacklisted_types', ())
+
+
 def distill_slash_traceback(err, line_radius=5):
-    returned = _extract_frames(err.traceback)
+    repr_blacklisted_types = _get_repr_blacklisted_types()
+    returned = _extract_frames(err.traceback, repr_blacklisted_types)
     for frame in returned:
         if _is_ipython_frame(frame):
             commands = frame['locals'].get('In', {}).get('value', None)
@@ -65,18 +81,18 @@ def distill_slash_traceback(err, line_radius=5):
             frame['code_lines_before'], _, frame['code_lines_after'] = _splice_lines(lines, lineno - 1, line_radius)
     return returned
 
-def _extract_frames(traceback):
+def _extract_frames(traceback, repr_blacklisted_types):
     returned = traceback.to_list()
     for frame, distilled_dict in zip(traceback.frames, returned):
         if 'locals' not in distilled_dict and hasattr(frame, 'python_frame'): # Slash 1.5.x deprecates the `locals` and `globals` attributes
-            distilled_dict['locals'] = _capture_locals(frame.python_frame)
-            distilled_dict['globals'] = _capture_globals(frame.python_frame)
+            distilled_dict['locals'] = _capture_locals(frame.python_frame, repr_blacklisted_types)
+            distilled_dict['globals'] = _capture_globals(frame.python_frame, repr_blacklisted_types)
     return returned
 
-def _capture_locals(frame):
+def _capture_locals(frame, repr_blacklisted_types):
     if frame is None:
         return None
-    return {local_name: {"value": _safe_repr(local_value)}
+    return {local_name: {"value": _safe_repr(local_value, repr_blacklisted_types)}
             for key, value in frame.f_locals.items()
             if "@" not in key
             for local_name, local_value in _unwrap_object_variable(key, value)}
@@ -106,11 +122,11 @@ def _iter_distilled_object_attributes(obj):
             continue
         yield attr, value
 
-def _capture_globals(frame):
+def _capture_globals(frame, repr_blacklisted_types):
     if frame is None:
         return None
     used_globals = set(frame.f_code.co_names)
-    return dict((global_name, {"value": _safe_repr(value)})
+    return dict((global_name, {"value": _safe_repr(value, repr_blacklisted_types)})
                 for global_name, value in frame.f_globals.items()
                 if global_name in used_globals and _is_global_included(value))
 
@@ -144,7 +160,10 @@ def _nested_assign(dictionary, key, value):
         else:
             dictionary = dictionary.setdefault(part, {})
 
-def _safe_repr(value, truncate=True):
+def _safe_repr(value, repr_blacklisted_types, truncate=True):
+    if isinstance(value, repr_blacklisted_types):
+        returned = "<{!r} object {:x}>".format(type(value).__name__, id(value))
+
     try:
         returned = repr(value)
     except Exception:  # pylint: disable=broad-except
