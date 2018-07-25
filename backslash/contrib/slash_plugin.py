@@ -119,8 +119,9 @@ class BackslashPlugin(PluginInterface):
                                  // Cmdline(append="--session-label", metavar="LABEL"),
             "blacklisted_warnings_category": [] // Doc(
                 'Specify warnings categories which should not be reported to backslash'),
+            "report_test_docstrings": False // Doc(
+                'Add test docstring to backslash test metadata') // Cmdline(on="--report_test_docstrings"),
         }
-
 
     @handle_exceptions
     def activate(self):
@@ -258,6 +259,9 @@ class BackslashPlugin(PluginInterface):
         log_path = slash.context.result.get_log_path()
         if log_path:
             kwargs.setdefault('metadata', {})['local_log_path'] = os.path.abspath(log_path)
+
+        if self.current_config.report_test_docstrings and slash.test.get_test_function().__doc__:
+            kwargs.setdefault('metadata', {})['docstring'] = slash.test.get_test_function().__doc__
 
         self.current_test = self.session.report_test_start(
             test_logical_id=slash.context.test.__slash__.id,
