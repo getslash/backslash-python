@@ -158,7 +158,8 @@ class BackslashPlugin(PluginInterface):
             metadata=metadata,
             **self._get_extra_session_start_kwargs()
         )
-
+        for warning in slash.context.session.warnings:
+            self.warning_added(warning)
         for label in self.current_config.session_labels:
             self.client.api.call.add_label(session_id=self.session.id, label=label)
 
