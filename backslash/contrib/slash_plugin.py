@@ -46,6 +46,7 @@ _PWD = os.path.abspath('.')
 _HAS_TEST_AVOIDED = (int(slash.__version__.split('.')[0]) >= 1)
 _HAS_SESSION_INTERRUPT = hasattr(slash.hooks, 'session_interrupt')
 _HAS_TEST_DISTRIBUTED = hasattr(slash.hooks, 'test_distributed')
+_HAS_APP_QUIT = hasattr(slash.hooks, 'app_quit')
 
 def handle_exceptions(func):
 
@@ -76,6 +77,7 @@ class BackslashPlugin(PluginInterface):
         self._error_containers = {}
         self._runtoken = runtoken
         self._propagate_exceptions = propagate_exceptions
+        self._started = False
 
     @property
     def rest_url(self):
@@ -158,6 +160,7 @@ class BackslashPlugin(PluginInterface):
             metadata=metadata,
             **self._get_extra_session_start_kwargs()
         )
+        self._started = True
         for warning in slash.context.session.warnings:
             self.warning_added(warning)
         for label in self.current_config.session_labels:
@@ -276,6 +279,7 @@ class BackslashPlugin(PluginInterface):
     def test_distributed(self, test_logical_id, worker_session_id): #pylint: disable=unused-argument
         if 'report_test_distributed' in self.client.api.info().endpoints:
             self.current_test = self.session.report_test_distributed(test_logical_id)
+
 
     @handle_exceptions
     def test_skip(self, reason=None):
@@ -409,6 +413,16 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     def session_end(self):
+        self._session_report_end('session_end')
+
+    @slash.plugins.register_if(_HAS_APP_QUIT)
+    @handle_exceptions  # pylint: disable=unused-argument
+    def app_quit(self):
+        self._session_report_end('app_quit')
+
+    def _session_report_end(self, hook_name):
+        if not self._started:
+            return
         try:
             if self._keepalive_thread is not None:
                 self._keepalive_thread.stop()
@@ -419,8 +433,9 @@ class BackslashPlugin(PluginInterface):
             if self.client.api.info().endpoints.report_session_end.version >= 2:
                 kwargs['has_fatal_errors'] = has_fatal_errors
             self.session.report_end(**kwargs)
+            self._started = False
         except Exception:       # pylint: disable=broad-except
-            _logger.error('Exception ignored in session_end', exc_info=True)
+            _logger.error('Exception ignored in {}'.format(hook_name), exc_info=True)
 
     @handle_exceptions
     def error_added(self, result, error):
