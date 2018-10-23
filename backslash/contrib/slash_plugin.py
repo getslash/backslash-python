@@ -297,25 +297,19 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     @slash.plugins.registers_on(None)
-    def get_tests_to_resume(self, session_id, get_successful=False, planned_first=False, failed_first=False):
+    def get_tests_to_resume(self, session_id, filters_dict):
+        """Queries backslash specific session's tests
+        :param session_id: the wanted session
+        :param filters_dict: a dictionary containing filters for backslash tests query
+        :rtype: list of test objects
+        """
         max_retries = 3
         for i in range(max_retries):
             try:
-                if not planned_first and not failed_first:
-                    params = {'session_id': session_id, 'show_successful': get_successful, 'show_planned':'true'}
-                    return reversed(LazyQuery(self.client, '/rest/tests', query_params=params).all())
-                planned_filters = ['show_planned', 'show_skipped']
-                failed_filters = ['show_unsuccessful', 'show_abandoned']
-                wanted_first = failed_filters if failed_first else planned_filters
-
-                first_params = {kwarg_name: (kwarg_name in wanted_first) for kwarg_name in failed_filters + planned_filters}
-                opposite_params = {k: not v for k, v in first_params.items()}
-                first_params.update({'session_id':session_id, 'show_successful': False})
-                opposite_params.update({'session_id':session_id, 'show_successful': get_successful})
-                first = LazyQuery(self.client, '/rest/tests', query_params=first_params).all()
-                others = LazyQuery(self.client, '/rest/tests', query_params=opposite_params).all()
-                others.extend(first)
-                return reversed(others)
+                default_params_dict = {x: 'true' for x in ['show_planned', 'show_skipped', 'show_unsuccessful', 'show_abandoned']}
+                default_params_dict.update({'session_id': session_id, 'show_successful': 'false'})
+                default_params_dict.update(filters_dict)
+                return reversed(LazyQuery(self.client, '/rest/tests', query_params=default_params_dict).all())
             except HTTPError:
                 if i == max_retries-1:
                     raise
