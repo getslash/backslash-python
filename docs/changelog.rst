@@ -1,6 +1,8 @@
 Changelog
 =========
 
+* :release:`2.38.0 <23-10-2018>`
+* :feature:`-` Support resuming sessions with unstarted-only or failed-only test filters
 * :release:`2.37.1 <10-10-2018>`
 * :release:`2.37.0 <16-9-2018>`
 * :feature:`-` Slash plugin can now optionally report test docstrings as metadata (thanks @yaelmi3!)
