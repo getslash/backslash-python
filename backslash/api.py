@@ -46,7 +46,7 @@ _MAX_PARAMS_UNCOMPRESSED_SIZE = 10 * 1024 * 1024 # 10Mb
 
 class API(object):
 
-    def __init__(self, client, url, runtoken):
+    def __init__(self, client, url, runtoken, timeout_seconds=60):
         super(API, self).__init__()
         self.client = client
         self.url = URL(url)
@@ -58,6 +58,7 @@ class API(object):
         })
         self.call = CallProxy(self)
         self._cached_info = None
+        self._timeout = timeout_seconds
 
     def __del__(self):
         if self.session is not None:
@@ -67,7 +68,7 @@ class API(object):
         """Inspects the remote API and returns information about its capabilities
         """
         if self._cached_info is None:
-            resp = self.session.options(self.url.add_path('api'))
+            resp = self.session.options(self.url.add_path('api'), timeout=self._timeout)
             raise_for_status(resp)
             self._cached_info = munchify(resp.json())
         return copy.deepcopy(self._cached_info)
@@ -82,7 +83,7 @@ class API(object):
 
             try:
                 resp = self.session.post(
-                    self.url.add_path('api').add_path(name), data=data, headers=headers)
+                    self.url.add_path('api').add_path(name), data=data, headers=headers, timeout=self._timeout)
             except (ConnectionError, ReadTimeout, ):
                 continue
 
@@ -105,7 +106,7 @@ class API(object):
                 time.sleep(random.randrange(*sleep_range))
 
     def get(self, path, raw=False, params=None):
-        resp = self.session.get(self.url.add_path(path), params=params)
+        resp = self.session.get(self.url.add_path(path), params=params, timeout=self._timeout)
         raise_for_status(resp)
         if raw:
             return resp.json()
@@ -113,7 +114,7 @@ class API(object):
             return self._normalize_return_value(resp)
 
     def delete(self, path, params=None):
-        resp = self.session.delete(self.url.add_path(path), params=params)
+        resp = self.session.delete(self.url.add_path(path), params=params, timeout=self._timeout)
         raise_for_status(resp)
         return resp
 
