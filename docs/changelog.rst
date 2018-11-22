@@ -1,7 +1,8 @@
 Changelog
 =========
 
-* :feature:`87` Add timeouts to all requests by default
+* :release:`2.38.1 <22-11-2018>`
+* :bug:`87` Add timeouts to all requests by default to avoid stalled requests taking forever
 * :release:`2.38.0 <23-10-2018>`
 * :feature:`-` Support resuming sessions with unstarted-only or failed-only test filters
 * :release:`2.37.1 <10-10-2018>`
