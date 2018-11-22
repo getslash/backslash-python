@@ -53,7 +53,8 @@ def handle_exceptions(func):
     @functools.wraps(func)
     def new_func(self, *args, **kwargs):
         try:
-            return func(self, *args, **kwargs)
+            with slash.exception_handling.handling_exceptions():
+                return func(self, *args, **kwargs)
         except Exception: # pylint: disable=broad-except
             exc_info = sys.exc_info()
             if not self._handle_exception(exc_info) or self._propagate_exceptions: # pylint: disable=protected-access
@@ -78,6 +79,7 @@ class BackslashPlugin(PluginInterface):
         self._runtoken = runtoken
         self._propagate_exceptions = propagate_exceptions
         self._started = False
+        self._adding_error = False
 
     @property
     def rest_url(self):
@@ -446,7 +448,14 @@ class BackslashPlugin(PluginInterface):
 
     @handle_exceptions
     def error_added(self, result, error):
-        self._add_exception(result=result, exception=error)
+        if self._adding_error:
+            return
+        self._adding_error = True
+        try:
+            with slash.exception_handling.handling_exceptions():
+                self._add_exception(result=result, exception=error)
+        finally:
+            self._adding_error = False
 
     @slash.plugins.register_if(hasattr(slash.hooks, 'interruption_added'))
     @handle_exceptions
