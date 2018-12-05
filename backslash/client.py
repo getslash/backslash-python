@@ -14,12 +14,12 @@ _logger = logbook.Logger(__name__)
 
 class Backslash(object):
 
-    def __init__(self, url, runtoken):
+    def __init__(self, url, runtoken, headers=None):
         super(Backslash, self).__init__()
         if not url.startswith('http'):
             url = 'http://{0}'.format(url)
         self._url = URL(url)
-        self.api = API(self, url, runtoken)
+        self.api = API(self, url, runtoken, headers=headers)
 
     @property
     def url(self):

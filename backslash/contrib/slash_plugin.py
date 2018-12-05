@@ -131,7 +131,15 @@ class BackslashPlugin(PluginInterface):
     def activate(self):
         if self._runtoken is None:
             self._runtoken = self._ensure_run_token()
-        self.client = BackslashClient(URL(self._get_backslash_url()), self._runtoken)
+        self.client = BackslashClient(
+            URL(self._get_backslash_url()),
+            self._runtoken, headers=self._get_default_headers())
+
+    def _get_default_headers(self):
+        """Override this method to control the headers sent to the Backslash server
+        on each reequest
+        """
+        return None
 
     def deactivate(self):
         if self._keepalive_thread is not None:

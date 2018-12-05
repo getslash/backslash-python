@@ -46,7 +46,7 @@ _MAX_PARAMS_UNCOMPRESSED_SIZE = 10 * 1024 * 1024 # 10Mb
 
 class API(object):
 
-    def __init__(self, client, url, runtoken, timeout_seconds=60):
+    def __init__(self, client, url, runtoken, timeout_seconds=60, headers=None):
         super(API, self).__init__()
         self.client = client
         self.url = URL(url)
@@ -56,6 +56,8 @@ class API(object):
             'X-Backslash-run-token': self.runtoken,
             'X-Backslash-client-version': BACKSLASH_CLIENT_VERSION,
         })
+        if headers is not None:
+            self.session.headers.update(headers)
         self.call = CallProxy(self)
         self._cached_info = None
         self._timeout = timeout_seconds
