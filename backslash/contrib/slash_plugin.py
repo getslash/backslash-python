@@ -32,7 +32,8 @@ from ..client import Backslash as BackslashClient
 from ..exceptions import ParamsTooLarge
 from ..utils import ensure_dir
 from .keepalive_thread import KeepaliveThread
-from .utils import normalize_file_path, distill_slash_traceback, distill_object_attributes, add_environment_variable_metadata
+from .utils import normalize_file_path, distill_slash_traceback, distill_object_attributes, \
+    add_environment_variable_metadata, _ROOT_DIR
 from ..lazy_query import LazyQuery
 from ..session import APPEND_UPCOMING_TESTS_STR
 from ..__version__ import __version__ as BACKSLASH_CLIENT_VERSION
@@ -398,7 +399,7 @@ class BackslashPlugin(PluginInterface):
     def _get_git_repo(self, dirname):
         if not os.path.isabs(dirname):
             dirname = os.path.abspath(os.path.join(_PWD, dirname))
-        while dirname != '/':
+        while dirname != _ROOT_DIR:
             if os.path.isdir(os.path.join(dirname, '.git')):
                 return git.Repo(dirname)
             dirname = os.path.normpath(os.path.abspath(os.path.join(dirname, '..')))
