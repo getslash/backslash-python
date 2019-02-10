@@ -2,7 +2,6 @@ import ast
 import linecache
 import os
 import types
-import platform
 
 from .._compat import PY2
 
@@ -30,17 +29,6 @@ _FILTERED_MEMBER_TYPES = tuple(_FILTERED_MEMBER_TYPES)
 _MAX_VARIABLE_VALUE_LENGTH = 100
 
 
-def _get_root_dir():
-    if platform.system() == 'Windows':
-        root_dir, _ = os.path.splitdrive(os.getcwd())
-        return os.path.join(root_dir, '\\')
-
-    return '/'
-
-
-_ROOT_DIR = _get_root_dir()
-
-
 def normalize_file_path(path):
     path = str(path)
     if path.endswith('.pyc'):
@@ -48,7 +36,7 @@ def normalize_file_path(path):
     if not os.path.isabs(path):
         path = os.path.abspath(os.path.join(_HERE, path))
     dirname = os.path.normpath(path)
-    while dirname != _ROOT_DIR:
+    while dirname != os.path.normpath(os.path.abspath(os.path.sep)):
         for special_dir in _SPECIAL_DIRS:
             if os.path.isdir(os.path.join(dirname, special_dir)):
                 return os.path.normpath(os.path.relpath(path, dirname))
