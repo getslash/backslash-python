@@ -398,7 +398,7 @@ class BackslashPlugin(PluginInterface):
     def _get_git_repo(self, dirname):
         if not os.path.isabs(dirname):
             dirname = os.path.abspath(os.path.join(_PWD, dirname))
-        while dirname != '/':
+        while dirname != os.path.normpath(os.path.abspath(os.path.sep)):
             if os.path.isdir(os.path.join(dirname, '.git')):
                 return git.Repo(dirname)
             dirname = os.path.normpath(os.path.abspath(os.path.join(dirname, '..')))
