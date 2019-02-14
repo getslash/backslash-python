@@ -157,7 +157,7 @@ class API(object):
                 continue
             returned[param_name] = param_value
         compressed = False
-        returned = json.dumps(returned)
+        returned = json.dumps(returned, default=repr)
         if len(returned) > _COMPRESS_THRESHOLD:
             compressed = True
             returned = self._compress(returned)
