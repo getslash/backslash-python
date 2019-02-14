@@ -36,7 +36,7 @@ def normalize_file_path(path):
     if not os.path.isabs(path):
         path = os.path.abspath(os.path.join(_HERE, path))
     dirname = os.path.normpath(path)
-    while dirname != '/':
+    while dirname != os.path.normpath(os.path.abspath(os.path.sep)):
         for special_dir in _SPECIAL_DIRS:
             if os.path.isdir(os.path.join(dirname, special_dir)):
                 return os.path.normpath(os.path.relpath(path, dirname))

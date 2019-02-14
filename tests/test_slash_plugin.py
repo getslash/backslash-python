@@ -9,7 +9,7 @@ from backslash.contrib.utils import distill_slash_traceback
 
 
 def test_importing_slash_plugin():
-    from backslash.contrib import slash_plugin  # pylint: disable=unused-variable
+    from backslash.contrib import slash_plugin  # pylint: disable=unused-variable,unused-import
 
 
 def test_exception_distilling(traceback):
