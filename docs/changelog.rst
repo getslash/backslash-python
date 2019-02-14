@@ -1,6 +1,10 @@
 Changelog
 =========
 
+* :release:`2.38.2 <14-02-2019>`
+* :bug:`-` Plugin method failures are now wrapped in ``handling_exceptions``, properly reporting failures when they happen
+* :bug:`-` Fixed support for Windows systems (thanks @eliadh)
+* :bug:`96` Fixed json encode-escaping when serializing API parameters
 * :release:`2.38.1 <22-11-2018>`
 * :bug:`87` Add timeouts to all requests by default to avoid stalled requests taking forever
 * :release:`2.38.0 <23-10-2018>`
