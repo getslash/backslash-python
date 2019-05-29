@@ -14,13 +14,14 @@ _logger = logbook.Logger(__name__)
 class ErrorContainer(object):
 
     def add_error(self, message, exception_type=NOTHING, traceback=NOTHING,
-                  timestamp=NOTHING, is_failure=NOTHING, exception_attrs=NOTHING, is_interruption=NOTHING):
+                  timestamp=NOTHING, is_failure=NOTHING, exception_attrs=NOTHING, is_interruption=NOTHING, is_fatal=NOTHING):
 
         kwargs = {self._get_id_key(): self.id,  # pylint: disable=no-member
                   'message': message,
                   'exception_type': exception_type,
                   'is_failure': is_failure,
                   'timestamp': timestamp,
+                  'is_fatal': is_fatal,
                   'is_interruption': is_interruption,
                   }
 

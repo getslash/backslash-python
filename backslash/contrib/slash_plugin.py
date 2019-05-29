@@ -453,7 +453,7 @@ class BackslashPlugin(PluginInterface):
         self._adding_error = True
         try:
             with slash.exception_handling.handling_exceptions():
-                self._add_exception(result=result, exception=error)
+                self._add_exception(result=result, exception=error, is_fatal=error.is_fatal())
         finally:
             self._adding_error = False
 
@@ -463,7 +463,7 @@ class BackslashPlugin(PluginInterface):
         self._add_exception(result=result, exception=exception, is_interruption=True)
 
 
-    def _add_exception(self, result, exception, is_interruption=False):
+    def _add_exception(self, result, exception, is_interruption=False, is_fatal=False):
         has_interruptions = self.client.api.info().endpoints.add_error.version >= 4
         if is_interruption and not has_interruptions:
             _logger.debug('Server does not support recording is_interruption exceptions. Skipping reporting')
@@ -497,7 +497,9 @@ class BackslashPlugin(PluginInterface):
 
         if has_interruptions:
             kwargs['is_interruption'] = is_interruption
-
+        has_fatal = self.client.api.info().endpoints.add_error.version >= 5
+        if has_fatal:
+            kwargs['is_fatal'] = is_fatal
         for compact_variables in [False, True]:
             if compact_variables:
                 for frame in kwargs['traceback']:
