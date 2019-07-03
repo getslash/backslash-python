@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :release:`2.39.0 <03-07-2019>`
 * :feature:`101` Report if error is fatal
 * :feature:`91` Allow passing custom default headers to server
 * :release:`2.38.2 <14-02-2019>`
