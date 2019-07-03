@@ -1,6 +1,8 @@
 Changelog
 =========
 
+* :feature:`101` Report if error is fatal
+* :feature:`91` Allow passing custom default headers to server
 * :release:`2.38.2 <14-02-2019>`
 * :bug:`-` Plugin method failures are now wrapped in ``handling_exceptions``, properly reporting failures when they happen
 * :bug:`-` Fixed support for Windows systems (thanks @eliadh)
