@@ -131,7 +131,15 @@ class BackslashPlugin(PluginInterface):
     def activate(self):
         if self._runtoken is None:
             self._runtoken = self._ensure_run_token()
-        self.client = BackslashClient(URL(self._get_backslash_url()), self._runtoken)
+        self.client = BackslashClient(
+            URL(self._get_backslash_url()),
+            self._runtoken, headers=self._get_default_headers())
+
+    def _get_default_headers(self):
+        """Override this method to control the headers sent to the Backslash server
+        on each reequest
+        """
+        return None
 
     def deactivate(self):
         if self._keepalive_thread is not None:
@@ -453,7 +461,7 @@ class BackslashPlugin(PluginInterface):
         self._adding_error = True
         try:
             with slash.exception_handling.handling_exceptions():
-                self._add_exception(result=result, exception=error)
+                self._add_exception(result=result, exception=error, is_fatal=error.is_fatal())
         finally:
             self._adding_error = False
 
@@ -463,7 +471,7 @@ class BackslashPlugin(PluginInterface):
         self._add_exception(result=result, exception=exception, is_interruption=True)
 
 
-    def _add_exception(self, result, exception, is_interruption=False):
+    def _add_exception(self, result, exception, is_interruption=False, is_fatal=False):
         has_interruptions = self.client.api.info().endpoints.add_error.version >= 4
         if is_interruption and not has_interruptions:
             _logger.debug('Server does not support recording is_interruption exceptions. Skipping reporting')
@@ -497,7 +505,9 @@ class BackslashPlugin(PluginInterface):
 
         if has_interruptions:
             kwargs['is_interruption'] = is_interruption
-
+        has_fatal = self.client.api.info().endpoints.add_error.version >= 5
+        if has_fatal:
+            kwargs['is_fatal'] = is_fatal
         for compact_variables in [False, True]:
             if compact_variables:
                 for frame in kwargs['traceback']:
