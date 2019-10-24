@@ -7,10 +7,10 @@ from ._compat import iteritems
 from .utils import raise_for_status
 
 
-class LazyQuery(object):
+class LazyQuery():
 
     def __init__(self, client, path=None, url=None, query_params=None, page_size=100):
-        super(LazyQuery, self).__init__()
+        super().__init__()
         self._client = client
         if url is None:
             url = client.api.url
@@ -37,7 +37,7 @@ class LazyQuery(object):
         return LazyQuery(self._client, url=returned_url, page_size=self._page_size)
 
     def __repr__(self):
-        return '<Query {0!r}>'.format(str(self._url))
+        return f'<Query {str(self._url)!r}>'
 
     def __iter__(self):
         for i in itertools.count():
@@ -77,7 +77,7 @@ class LazyQuery(object):
             raise RuntimeError('Multiple keys returned')
         [obj_typename] = keys
         if self._typename is not None and obj_typename != self._typename:
-            raise RuntimeError('Got different typename in query: {!r} != {!r}'.format(obj_typename, self._typename))
+            raise RuntimeError(f'Got different typename in query: {obj_typename!r} != {self._typename!r}')
         self._typename = obj_typename
 
         for index, json_obj in enumerate(response_data[self._typename]):

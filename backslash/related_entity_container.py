@@ -1,4 +1,4 @@
-class RelatedEntityContainer(object):
+class RelatedEntityContainer():
 
     def add_related_entity(self, entity_type, entity_name):
         # pylint: disable=no-member

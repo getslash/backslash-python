@@ -68,7 +68,7 @@ class BackslashPlugin(PluginInterface):
 
     def __init__(self, url=None, keepalive_interval=None, runtoken=None,
                  propagate_exceptions=False, config_filename=_DEFAULT_CONFIG_FILENAME):
-        super(BackslashPlugin, self).__init__()
+        super().__init__()
         self._url = url
         self._repo_cache = {}
         self._config_filename = config_filename
@@ -98,7 +98,7 @@ class BackslashPlugin(PluginInterface):
         session = slash.context.session
         if session is None or self.client is None:
             return None
-        return self.client.get_ui_url('sessions/{}'.format(session.id))
+        return self.client.get_ui_url(f'sessions/{session.id}')
 
     def _handle_exception(self, exc_info):
         pass
@@ -144,7 +144,7 @@ class BackslashPlugin(PluginInterface):
     def deactivate(self):
         if self._keepalive_thread is not None:
             self._keepalive_thread.stop()
-        super(BackslashPlugin, self).deactivate()
+        super().deactivate()
 
     def _notify_session_start(self):
         metadata = self._get_initial_session_metadata()
@@ -298,7 +298,7 @@ class BackslashPlugin(PluginInterface):
     @slash.plugins.registers_on(None)
     def is_session_exist(self, session_id):
         try:
-            self.client.api.get('/rest/sessions/{0}'.format(session_id))
+            self.client.api.get(f'/rest/sessions/{session_id}')
             return True
         except HTTPError as e:
             if e.response.status_code == 404:
@@ -392,10 +392,10 @@ class BackslashPlugin(PluginInterface):
                     data = f.read()
                     h = hashlib.sha1()
                     h.update('blob '.encode('utf-8'))
-                    h.update('{0}\0'.format(len(data)).encode('utf-8'))
+                    h.update(f'{len(data)}\0'.encode('utf-8'))
                     h.update(data)
             except IOError as e:
-                _logger.debug('Ignoring IOError {0!r} when calculating file hash for {1}', e, filename)
+                _logger.debug(f'Ignoring IOError {e!r} when calculating file hash for {filename}')
                 returned = None
             else:
                 returned = h.hexdigest()
@@ -452,7 +452,7 @@ class BackslashPlugin(PluginInterface):
             self.session.report_end(**kwargs)
             self._started = False
         except Exception:       # pylint: disable=broad-except
-            _logger.error('Exception ignored in {}'.format(hook_name), exc_info=True)
+            _logger.error(f'Exception ignored in {hook_name}', exc_info=True)
 
     @handle_exceptions
     def error_added(self, result, error):
@@ -588,7 +588,7 @@ class BackslashPlugin(PluginInterface):
                    headers={'Content-type': 'application/json'})\
              .raise_for_status()
 
-            s.post(URL(self._get_backslash_url()).add_path('/runtoken/request/{}/complete'.format(request_id)))\
+            s.post(URL(self._get_backslash_url()).add_path(f'/runtoken/request/{request_id}/complete'))\
              .raise_for_status()
 
             resp = s.get(response_url)

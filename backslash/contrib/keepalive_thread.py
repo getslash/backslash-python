@@ -8,7 +8,7 @@ _logger = logbook.Logger(__name__)
 class KeepaliveThread(threading.Thread):
 
     def __init__(self, client, session, interval, error_callback=None):
-        super(KeepaliveThread, self).__init__()
+        super().__init__()
         self._client = client
         self._session = session
         self._interval = interval / 2.0

@@ -1,4 +1,4 @@
-class TimingContainer(object):
+class TimingContainer():
 
     def report_timing_start(self, name):
         self._report('start', name)
@@ -9,7 +9,7 @@ class TimingContainer(object):
     def _report(self, start_stop, name):
         kwargs = {'name': name}
         kwargs.update(self._get_identity_kwargs())
-        self.client.api.call_function('report_timing_{}'.format(start_stop), kwargs) # pylint: disable=no-member
+        self.client.api.call_function(f'report_timing_{start_stop}', kwargs) # pylint: disable=no-member
 
     def _get_identity_kwargs(self):
         if self.type.lower() == 'session': # pylint: disable=no-member

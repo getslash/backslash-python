@@ -50,7 +50,7 @@ def test_session_webapp_url_with_session(installed_plugin, server_url):
     installed_plugin.activate()
     with slash.Session() as s:
         url = installed_plugin.session_webapp_url
-    assert url == '{}/#/sessions/{}'.format(server_url, s.id)
+    assert url == f'{server_url}/#/sessions/{s.id}'
 
 
 @pytest.fixture

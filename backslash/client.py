@@ -12,12 +12,12 @@ from .lazy_query import LazyQuery
 _logger = logbook.Logger(__name__)
 
 
-class Backslash(object):
+class Backslash():
 
     def __init__(self, url, runtoken, headers=None):
-        super(Backslash, self).__init__()
+        super().__init__()
         if not url.startswith('http'):
-            url = 'http://{0}'.format(url)
+            url = f'http://{url}'
         self._url = URL(url)
         self.api = API(self, url, runtoken, headers=headers)
 
@@ -33,7 +33,7 @@ class Backslash(object):
             fragment = '/'
         elif not fragment.startswith('/'):
             fragment = '/' + fragment
-        returned += '#{}'.format(fragment)
+        returned += f'#{fragment}'
         return returned
 
 
