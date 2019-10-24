@@ -1,4 +1,4 @@
-class MetadataHolder(object):
+class MetadataHolder():
 
     def set_metadata(self, key, value):
         self.client.api.call_function('set_metadata', {

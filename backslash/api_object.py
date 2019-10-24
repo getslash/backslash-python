@@ -1,8 +1,8 @@
 
-class APIObject(object):
+class APIObject():
 
     def __init__(self, client, json_data):
-        super(APIObject, self).__init__()
+        super().__init__()
         self.client = client
         self._data = json_data
 
@@ -38,7 +38,7 @@ class APIObject(object):
         return self.client.api.get(self.api_path, raw=True)[self._data['type']]
 
     def __repr__(self):
-        return '<API:{data[type]}:{data[id]}>'.format(data=self._data)
+        return f'<API:{self._data[type]}:{self._data[id]}>'
 
     def without_fields(self, field_names):
         new_data = dict((field_name, field_value)

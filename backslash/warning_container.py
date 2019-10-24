@@ -4,7 +4,7 @@ from .contrib.utils import normalize_file_path
 from .lazy_query import LazyQuery
 
 
-class WarningContainer(object):
+class WarningContainer():
 
     def add_warning(self, message, filename=NOTHING, lineno=NOTHING, timestamp=NOTHING):
         return self.client.api.call_function('add_warning', {self._get_id_key(): self.id,

@@ -103,7 +103,7 @@ def _unwrap_object_variable(var_name, var_value):
         return
 
     for attr, value in _iter_distilled_object_attributes(var_value):
-        yield 'self.{}'.format(attr), value
+        yield f'self.{attr}', value
 
 def _iter_distilled_object_attributes(obj):
     try:
@@ -162,12 +162,12 @@ def _nested_assign(dictionary, key, value):
 
 def _safe_repr(value, repr_blacklisted_types, truncate=True):
     if isinstance(value, repr_blacklisted_types):
-        returned = "<{!r} object {:x}>".format(type(value).__name__, id(value))
+        returned = f"<{type(value).__name__!r} object {id(value):x}>"
 
     try:
         returned = repr(value)
     except Exception:  # pylint: disable=broad-except
-        return "[Unprintable {0!r} object]".format(type(value).__name__)
+        return f"[Unprintable {type(value).__name__!r} object]"
 
     if truncate and len(returned) > _MAX_VARIABLE_VALUE_LENGTH:
         returned = returned[:_MAX_VARIABLE_VALUE_LENGTH - 3] + '...'

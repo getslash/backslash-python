@@ -44,8 +44,7 @@ def test_querying_simple_equality(query):
 
 def test_querying_with_field_queries(query, field_value, operator_name, operator_func):
     query = query.filter(operator_func(FIELDS.field_name, field_value))
-    assert query._url.query == 'field_name={0}%3A{1}'.format(  # pylint: disable=protected-access
-        operator_name, field_value)
+    assert query._url.query == f'field_name={operator_name}%3A{field_value}'  # pylint: disable=protected-access
 
 def test_querying_between(query):
     assert query.filter(1 <= FIELDS.x <= 2)._url.query == 'x=ge%3A1&x=le%3A2'  # pylint: disable=protected-access
@@ -75,7 +74,7 @@ def operator_func(operator_name):
 @pytest.fixture
 def url(request, flask_app):
     address = str(uuid1())
-    returned = URL('http://{0}'.format(address))
+    returned = URL(f'http://{address}')
     webapp = FlaskLoopback(flask_app)
     webapp.activate_address((address, 80))
 
@@ -117,10 +116,10 @@ def test_fake_cursor_count():
     assert FakeCursor(lst).offset(30).limit(50000).count() == 970
 
 
-class FakeCursor(object):
+class FakeCursor():
 
     def __init__(self, lst):
-        super(FakeCursor, self).__init__()
+        super().__init__()
         self._lst = lst
         self._iterated = False
 

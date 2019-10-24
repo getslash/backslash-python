@@ -14,7 +14,7 @@ class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commenta
 
     @property
     def ui_url(self):
-        return self.client.get_ui_url('sessions/{}/tests/{}'.format(self.session_display_id, self.logical_id or self.id))
+        return self.client.get_ui_url(f'sessions/{self.session_display_id}/tests/{self.logical_id or self.id}')
 
     def report_end(self, duration=NOTHING):
         self.client.api.call_function('report_test_end', {'id': self.id, 'duration': duration})
@@ -33,7 +33,7 @@ class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commenta
         return LazyQuery(self.client, '/rest/errors', query_params={'test_id': self.id})
 
     def get_session(self):
-        return self.client.api.get('/rest/sessions/{0}'.format(self.session_id))
+        return self.client.api.get(f'/rest/sessions/{self.session_id}')
 
     def get_parent(self):
         return self.get_session()

@@ -44,10 +44,10 @@ _MAX_PARAMS_COMPRESSED_SIZE = 5 * 1024 * 1024  # 5Mb
 _MAX_PARAMS_UNCOMPRESSED_SIZE = 10 * 1024 * 1024 # 10Mb
 
 
-class API(object):
+class API():
 
     def __init__(self, client, url, runtoken, timeout_seconds=60, headers=None):
-        super(API, self).__init__()
+        super().__init__()
         self.client = client
         self.url = URL(url)
         self.runtoken = runtoken
@@ -177,10 +177,10 @@ class API(object):
         return s.getvalue()
 
 
-class CallProxy(object):
+class CallProxy():
 
     def __init__(self, api):
-        super(CallProxy, self).__init__()
+        super().__init__()
         self._api = api
 
     def __getattr__(self, attr):

@@ -1,6 +1,7 @@
 Changelog
 =========
 
+* :feature:`104` Drop support for python version < 3.6
 * :release:`2.39.0 <03-07-2019>`
 * :feature:`101` Report if error is fatal
 * :feature:`91` Allow passing custom default headers to server

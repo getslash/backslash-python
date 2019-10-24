@@ -1,5 +1,5 @@
-class Compatibility(object):
+class Compatibility():
 
     def __init__(self, client):
-        super(Compatibility, self).__init__()
+        super().__init__()
         self.client = client

@@ -11,7 +11,7 @@ from sentinels import NOTHING
 _logger = logbook.Logger(__name__)
 
 
-class ErrorContainer(object):
+class ErrorContainer():
 
     def add_error(self, message, exception_type=NOTHING, traceback=NOTHING,
                   timestamp=NOTHING, is_failure=NOTHING, exception_attrs=NOTHING, is_interruption=NOTHING, is_fatal=NOTHING):
