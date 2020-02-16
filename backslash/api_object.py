@@ -38,7 +38,7 @@ class APIObject():
         return self.client.api.get(self.api_path, raw=True)[self._data['type']]
 
     def __repr__(self):
-        return f'<API:{self._data[type]}:{self._data[id]}>'
+        return f"<API:{self._data.get('type')}:{self._data.get('id')}>"
 
     def without_fields(self, field_names):
         new_data = dict((field_name, field_value)

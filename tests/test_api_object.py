@@ -32,6 +32,13 @@ def test_object_api_url(client):
     obj = APIObject(client, data)
     assert obj.api_url == 'http://127.0.0.1:12345/rest/objects/1'
 
+
+def test_object_api_repr(client):
+    data = {'id': 1, 'type': 'test'}
+    obj = APIObject(client, data)
+    assert repr(obj) == '<API:test:1>'
+
+
 def test_object_ui_url(client):
     obj = APIObject(client, {})
     with pytest.raises(NotImplementedError):
