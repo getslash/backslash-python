@@ -11,20 +11,22 @@ from .lazy_query import LazyQuery
 from .metadata_holder import MetadataHolder
 from .timing_container import TimingContainer
 
+from typing import Dict, Any
+
 APPEND_UPCOMING_TESTS_STR = 'append_upcoming_tests'
 
 class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archiveable, Commentable, RelatedEntityContainer, TimingContainer):
 
     @property
-    def ui_url(self):
+    def ui_url(self) -> str:
         return self.client.get_ui_url(f'/sessions/{self.logical_id or self.id}')
 
-    def report_end(self, duration=NOTHING, has_fatal_errors=NOTHING):
+    def report_end(self, duration=NOTHING, has_fatal_errors=NOTHING) -> None:
 
         kwargs = {'id': self.id, 'duration': duration, 'has_fatal_errors': has_fatal_errors}
         self.client.api.call_function('report_session_end', kwargs)
 
-    def send_keepalive(self):
+    def send_keepalive(self) -> None:
         self.client.api.call_function('send_keepalive', {'session_id': self.id})
 
     def report_test_start(self, name, file_name=NOTHING, class_name=NOTHING, test_logical_id=NOTHING, scm=NOTHING,
@@ -65,26 +67,26 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
 
         return returned
 
-    def report_test_distributed(self, test_logical_id):
+    def report_test_distributed(self, test_logical_id) -> None:
         self.client.api.call_function('report_test_distributed', {'session_id': self.id, 'test_logical_id': test_logical_id})
 
-    def report_upcoming_tests(self, tests):
+    def report_upcoming_tests(self, tests) -> None:
         self.client.api.call_function(APPEND_UPCOMING_TESTS_STR,
                                       {'tests':tests, 'session_id':self.id}
                                      )
 
-    def report_in_pdb(self):
+    def report_in_pdb(self) -> None:
         self.client.api.call_function('report_in_pdb', {'session_id': self.id})
 
-    def report_not_in_pdb(self):
+    def report_not_in_pdb(self) -> None:
         self.client.api.call_function('report_not_in_pdb', {'session_id': self.id})
 
-    def report_interrupted(self):
+    def report_interrupted(self) -> None:
         if 'report_session_interrupted' in self.client.api.info().endpoints:
             self.client.api.call_function('report_session_interrupted', {'id': self.id})
 
 
-    def add_subject(self, name, product=NOTHING, version=NOTHING, revision=NOTHING):
+    def add_subject(self, name: str, product=NOTHING, version=NOTHING, revision=NOTHING):
         return self.client.api.call_function(
             'add_subject',
             {'session_id': self.id, 'name': name, 'product': product, 'version': version, 'revision': revision})
@@ -92,7 +94,7 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def edit_status(self, status):
         return self.client.api.call_function('edit_session_status', {'id': self.id, 'status': status})
 
-    def query_tests(self, include_planned=False):
+    def query_tests(self, include_planned: bool=False) -> LazyQuery:
         """Queries tests of the current session
 
         :rtype: A lazy query object
@@ -102,7 +104,7 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
             params = {'show_planned':'true'}
         return LazyQuery(self.client, f'/rest/sessions/{self.id}/tests', query_params=params)
 
-    def query_errors(self):
+    def query_errors(self) -> LazyQuery:
         """Queries tests of the current session
 
         :rtype: A lazy query object
@@ -112,11 +114,11 @@ class Session(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Archi
     def toggle_investigated(self):
         return self.client.api.call_function('toggle_investigated', {'session_id': self.id})
 
-    def get_parent(self):
+    def get_parent(self) -> None:
         return None
 
 
-def _sanitize_params(params, max_length=100):
+def _sanitize_params(params: Dict[str, Any], max_length: int=100) -> Dict[str, Any]:
     if params is NOTHING:
         return params
 
