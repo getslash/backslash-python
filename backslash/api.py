@@ -22,6 +22,9 @@ from .test import Test
 from .user import User
 from .utils import raise_for_status, compute_memory_usage
 from .warning import Warning
+from backslash.client import Backslash
+
+from typing import Optional, Union, Dict, Tuple, Any, Iterator
 
 _RETRY_STATUS_CODES = frozenset([
     requests.codes.bad_gateway,
@@ -46,7 +49,11 @@ _MAX_PARAMS_UNCOMPRESSED_SIZE = 10 * 1024 * 1024 # 10Mb
 
 class API():
 
-    def __init__(self, client, url, runtoken, timeout_seconds=60, headers=None):
+    def __init__(self, client: Backslash,
+                 url: str,
+                 runtoken: str,
+                 timeout_seconds: int=60,
+                 headers: Optional[Dict[str, str]]=None) -> None:
         super().__init__()
         self.client = client
         self.url = URL(url)
@@ -62,7 +69,7 @@ class API():
         self._cached_info = None
         self._timeout = timeout_seconds
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self.session is not None:
             self.session.close()
 
@@ -75,7 +82,7 @@ class API():
             self._cached_info = munchify(resp.json())
         return copy.deepcopy(self._cached_info)
 
-    def call_function(self, name, params=None):
+    def call_function(self, name, params: Optional[Dict[str, Optional[Union[str, int]]]]=None):
         is_compressed, data = self._serialize_params(params)
         headers = {'Content-type': 'application/json'}
         if is_compressed:
@@ -99,7 +106,7 @@ class API():
 
         return self._normalize_return_value(resp)
 
-    def _iter_retries(self, timeout=30, sleep_range=(3, 10)):
+    def _iter_retries(self, timeout: int=30, sleep_range: Tuple[int, int]=(3, 10)) -> Iterator:
         start_time = time.time()
         end_time = start_time + timeout
         while True:
@@ -107,7 +114,7 @@ class API():
             if time.time() < end_time:
                 time.sleep(random.randrange(*sleep_range))
 
-    def get(self, path, raw=False, params=None):
+    def get(self, path: str, raw: bool=False, params: Optional[Dict[str, Any]]=None):
         resp = self.session.get(self.url.add_path(path), params=params, timeout=self._timeout)
         raise_for_status(resp)
         if raw:
@@ -115,12 +122,12 @@ class API():
         else:
             return self._normalize_return_value(resp)
 
-    def delete(self, path, params=None):
+    def delete(self, path: str, params=None) -> requests.Response:
         resp = self.session.delete(self.url.add_path(path), params=params, timeout=self._timeout)
         raise_for_status(resp)
         return resp
 
-    def _normalize_return_value(self, response):
+    def _normalize_return_value(self, response: requests.Response):
         json_res = response.json()
         if json_res is None:
             return None
@@ -135,17 +142,18 @@ class API():
             return self.build_api_object(result)
         return result
 
-    def build_api_object(self, result):
+    def build_api_object(self, result: Dict[str, Any]):
         objtype = self._get_objtype(result)
         if objtype is None:
             return result
         return objtype(self.client, result)
 
-    def _get_objtype(self, json_object):
+    def _get_objtype(self, json_object: Dict[str, Any])\
+            -> Union[Session, Test, Error, Warning, Comment, Suite, User]:
         typename = json_object['type']
         return _TYPES_BY_TYPENAME.get(typename)
 
-    def _serialize_params(self, params):
+    def _serialize_params(self, params: Dict[str, Any]) -> Tuple[bool, bytes]:
         if params is None:
             params = {}
 
@@ -167,7 +175,7 @@ class API():
             raise ParamsTooLarge()
         return compressed, returned
 
-    def _compress(self, data):
+    def _compress(self, data: str) -> bytes:
         s = BytesIO()
 
         with gzip.GzipFile(fileobj=s, mode='wb') as f:
@@ -179,11 +187,11 @@ class API():
 
 class CallProxy():
 
-    def __init__(self, api):
+    def __init__(self, api: API) -> None:
         super().__init__()
         self._api = api
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str):
         if attr.startswith('_'):
             raise AttributeError(attr)
 
