@@ -22,9 +22,8 @@ from .test import Test
 from .user import User
 from .utils import raise_for_status, compute_memory_usage
 from .warning import Warning
-from backslash.client import Backslash
 
-from typing import Optional, Union, Dict, Tuple, Any, Iterator
+from typing import Optional, Union, Dict, Tuple, Any, Iterator, Type
 
 _RETRY_STATUS_CODES = frozenset([
     requests.codes.bad_gateway,
@@ -49,7 +48,7 @@ _MAX_PARAMS_UNCOMPRESSED_SIZE = 10 * 1024 * 1024 # 10Mb
 
 class API():
 
-    def __init__(self, client: Backslash,
+    def __init__(self, client,  #: Backslash
                  url: str,
                  runtoken: str,
                  timeout_seconds: int=60,
@@ -82,7 +81,7 @@ class API():
             self._cached_info = munchify(resp.json())
         return copy.deepcopy(self._cached_info)
 
-    def call_function(self, name, params: Optional[Dict[str, Optional[Union[str, int]]]]=None):
+    def call_function(self, name, params: Dict[str, Any]=None):
         is_compressed, data = self._serialize_params(params)
         headers = {'Content-type': 'application/json'}
         if is_compressed:
@@ -153,7 +152,7 @@ class API():
         typename = json_object['type']
         return _TYPES_BY_TYPENAME.get(typename)
 
-    def _serialize_params(self, params: Dict[str, Any]) -> Tuple[bool, bytes]:
+    def _serialize_params(self, params: Optional[Dict[str, Any]]) -> Tuple[bool, Dict[Any, Any]]:
         if params is None:
             params = {}
 
@@ -167,10 +166,10 @@ class API():
                 continue
             returned[param_name] = param_value
         compressed = False
-        returned = json.dumps(returned, default=repr)
+        returned: str = json.dumps(returned, default=repr)
         if len(returned) > _COMPRESS_THRESHOLD:
             compressed = True
-            returned = self._compress(returned)
+            returned: bytes = self._compress(returned)
         if len(returned) > _MAX_PARAMS_COMPRESSED_SIZE:
             raise ParamsTooLarge()
         return compressed, returned
