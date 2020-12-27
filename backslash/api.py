@@ -81,7 +81,7 @@ class API():
             self._cached_info = munchify(resp.json())
         return copy.deepcopy(self._cached_info)
 
-    def call_function(self, name, params: Dict[str, Any]=None):
+    def call_function(self, name: str, params: Dict[str, Any]=None):
         is_compressed, data = self._serialize_params(params)
         headers = {'Content-type': 'application/json'}
         if is_compressed:
