@@ -1,15 +1,19 @@
 import os
 from sys import getsizeof
 
-from requests import HTTPError
+from typing import TypeVar
+
+from requests import HTTPError, Response
+
+T = TypeVar('T')
 
 
-def ensure_dir(path):
+def ensure_dir(path: str) -> None:
     if not os.path.isdir(path):
         os.makedirs(path)
 
 
-def compute_memory_usage(obj):
+def compute_memory_usage(obj: T) -> int:
     seen = set()
     stack = [obj]
     returned = 0
@@ -28,7 +32,7 @@ def compute_memory_usage(obj):
     return returned
 
 
-def raise_for_status(resp):
+def raise_for_status(resp: Response) -> None:
     try:
         resp.raise_for_status()
     except HTTPError as e:
