@@ -23,7 +23,12 @@ from .user import User
 from .utils import raise_for_status, compute_memory_usage
 from .warning import Warning
 
-from typing import Optional, Union, Dict, Tuple, Any, Iterator, Type
+from typing import Optional, Union, Dict, Tuple, Any, Iterator, Type, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .client import Backslash
+
+ObjectType = Union[Session, Test, Error, Warning, Comment, Suite, User]
 
 _RETRY_STATUS_CODES = frozenset([
     requests.codes.bad_gateway,
@@ -48,7 +53,7 @@ _MAX_PARAMS_UNCOMPRESSED_SIZE = 10 * 1024 * 1024 # 10Mb
 
 class API():
 
-    def __init__(self, client,  #: Backslash
+    def __init__(self, client: "Backslash",
                  url: str,
                  runtoken: str,
                  timeout_seconds: int=60,
@@ -126,7 +131,7 @@ class API():
         raise_for_status(resp)
         return resp
 
-    def _normalize_return_value(self, response: requests.Response):
+    def _normalize_return_value(self, response: requests.Response) -> Optional[Union[Dict[str, Any], ObjectType]]:
         json_res = response.json()
         if json_res is None:
             return None
@@ -141,14 +146,13 @@ class API():
             return self.build_api_object(result)
         return result
 
-    def build_api_object(self, result: Dict[str, Any]):
+    def build_api_object(self, result: Dict[str, Any]) -> Union[Dict[str, Any], ObjectType]:
         objtype = self._get_objtype(result)
         if objtype is None:
             return result
         return objtype(self.client, result)
 
-    def _get_objtype(self, json_object: Dict[str, Any])\
-            -> Union[Session, Test, Error, Warning, Comment, Suite, User]:
+    def _get_objtype(self, json_object: Dict[str, Any]) -> ObjectType:
         typename = json_object['type']
         return _TYPES_BY_TYPENAME.get(typename)
 
