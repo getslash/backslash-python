@@ -16,12 +16,12 @@ class APIObject():
     def ui_url(self):
         raise NotImplementedError() # pragma: no cover
 
-    def __eq__(self, other: APIObject) -> bool:
+    def __eq__(self, other: "APIObject") -> bool:
         if not isinstance(other, APIObject):
             return NotImplemented
         return self.client is other.client and self._data == other._data  # pylint: disable=protected-access
 
-    def __ne__(self, other: APIObject) -> bool:
+    def __ne__(self, other: "APIObject") -> bool:
         return not (self == other)  # pylint: disable=superfluous-parens
 
     def __getattr__(self, name: str) -> Optional[Union[int, str]]:
