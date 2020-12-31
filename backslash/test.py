@@ -13,19 +13,19 @@ from .timing_container import TimingContainer
 class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commentable, RelatedEntityContainer, TimingContainer):
 
     @property
-    def ui_url(self):
+    def ui_url(self) -> str:
         return self.client.get_ui_url(f'sessions/{self.session_display_id}/tests/{self.logical_id or self.id}')
 
-    def report_end(self, duration=NOTHING):
+    def report_end(self, duration=NOTHING) -> None:
         self.client.api.call_function('report_test_end', {'id': self.id, 'duration': duration})
 
-    def mark_skipped(self, reason=None):
+    def mark_skipped(self, reason=None) -> None:
         self.client.api.call_function('report_test_skipped', {'id': self.id, 'reason': reason})
 
-    def report_interrupted(self):
+    def report_interrupted(self) -> None:
         self.client.api.call_function('report_test_interrupted', {'id': self.id})
 
-    def query_errors(self):
+    def query_errors(self) -> LazyQuery:
         """Queries tests of the current session
 
         :rtype: A lazy query object
@@ -38,5 +38,5 @@ class Test(APIObject, MetadataHolder, ErrorContainer, WarningContainer, Commenta
     def get_parent(self):
         return self.get_session()
 
-    def update_status_description(self, description):
+    def update_status_description(self, description: str):
         return self.client.api.call_function('update_status_description', {'test_id': self.id, 'description': description})

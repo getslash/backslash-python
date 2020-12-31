@@ -7,6 +7,8 @@ from urlobject import URLObject as URL
 
 from .api import API
 from .lazy_query import LazyQuery
+from typing import Optional, Union
+from urlobject.urlobject import URLObject
 
 
 _logger = logbook.Logger(__name__)
@@ -14,7 +16,7 @@ _logger = logbook.Logger(__name__)
 
 class Backslash():
 
-    def __init__(self, url, runtoken, headers=None):
+    def __init__(self, url: Union[str, URLObject], runtoken: str, headers: None=None) -> None:
         super().__init__()
         if not url.startswith('http'):
             url = f'http://{url}'
@@ -22,10 +24,10 @@ class Backslash():
         self.api = API(self, url, runtoken, headers=headers)
 
     @property
-    def url(self):
+    def url(self) -> URLObject:
         return self._url
 
-    def get_ui_url(self, fragment=None):
+    def get_ui_url(self, fragment: Optional[str]=None) -> str:
         returned = str(self.url)
         if not returned.endswith('/'):
             returned += '/'
@@ -43,7 +45,7 @@ class Backslash():
     def get_user_run_tokens(self, user_id):
         return self.api.call_function('get_user_run_tokens', {'user_id': user_id})
 
-    def delete_comment(self, comment_id):
+    def delete_comment(self, comment_id) -> None:
         self.api.call_function('delete_comment', {'comment_id': comment_id})
 
     def report_session_start(self, logical_id=NOTHING,
@@ -87,19 +89,19 @@ class Backslash():
         returned = self.api.call_function('report_session_start', params)
         return returned
 
-    def query_sessions(self):
+    def query_sessions(self) -> LazyQuery:
         """Queries sessions stored on the server
 
         :rtype: A lazy query object
         """
         return LazyQuery(self, '/rest/sessions')
 
-    def query_tests(self):
+    def query_tests(self) -> LazyQuery:
         """Queries tests stored on the server (directly, not via a session)
 
         :rtype: A lazy query object
         """
         return LazyQuery(self, '/rest/tests')
 
-    def query(self, path, **kwargs):
+    def query(self, path, **kwargs) -> LazyQuery:
         return LazyQuery(self, path, **kwargs)
