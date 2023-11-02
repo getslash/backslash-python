@@ -33,6 +33,7 @@ ObjectType = Union[Session, Test, Error, Warning, Comment, Suite, User]
 _RETRY_STATUS_CODES = frozenset([
     requests.codes.bad_gateway,
     requests.codes.gateway_timeout,
+    requests.codes.server_error,
 ])
 
 _TYPES_BY_TYPENAME = {
