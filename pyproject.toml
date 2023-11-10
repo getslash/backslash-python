@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling>=0.25.1", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "backslash"
+description = "Client library for the Backslash test reporting service"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { text = "BSD 3-Clause License" }
+
+classifiers = ["Programming Language :: Python :: 3.7"]
+dependencies = [
+    "GitPython",
+    "Logbook",
+    "munch",
+    "requests",
+    "sentinels",
+    "URLObject",
+    "vintage",
+]
+
+dynamic = ["version"]
+
+authors = [{ name = "Rotem Yaari", email = "vmalloc@gmail.com" }]
+
+[project.urls]
+"Homepage" = "http://getslash.github.io/"
+"GitHub" = "https://github.com/getslash/backslash"
+
+[project.optional-dependencies]
+testing = [
+    "slash>=1.5.0",
+    "Flask",
+    "Flask-Loopback",
+    "pylint",
+    "pytest>4.0",
+    "pytest-cov>=2.6",
+    "URLObject",
+    "weber-utils",
+]
+doc = ["alabaster", "releases", "Sphinx"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.pytest]
+testpaths = "tests"
+timeout_method = "signal"
+addopts = "-ra -W error::DeprecationWarning"

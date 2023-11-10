@@ -1,7 +1,0 @@
-GitPython
-Logbook
-munch
-requests
-sentinels
-URLObject
-vintage

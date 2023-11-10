@@ -12,7 +12,7 @@ doc: env
 env: .env/.up-to-date
 
 
-.env/.up-to-date: setup.py Makefile setup.cfg
+.env/.up-to-date: Makefile pyproject.toml
 	python3 -m venv .env
 	.env/bin/pip install -e .[testing,doc]
 	touch $@
