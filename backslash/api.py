@@ -23,7 +23,7 @@ from .user import User
 from .utils import raise_for_status, compute_memory_usage
 from .warning import Warning
 
-from typing import Optional, Union, Dict, Tuple, Any, Iterator, Type, TYPE_CHECKING
+from typing import Optional, Union, Dict, Tuple, Any, Iterator, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .client import Backslash

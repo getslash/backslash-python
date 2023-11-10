@@ -28,7 +28,7 @@ class APIObject():
         try:
             return self.__dict__['_data'][name]
         except KeyError:
-            raise AttributeError(name)
+            raise AttributeError(name) from None
 
     def refresh(self):
         prev_id = self.id

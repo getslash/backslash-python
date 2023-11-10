@@ -9,7 +9,7 @@ from backslash.contrib.utils import distill_slash_traceback
 
 
 def test_importing_slash_plugin():
-    from backslash.contrib import slash_plugin  # pylint: disable=unused-variable,unused-import
+    from backslash.contrib import slash_plugin  # pylint: disable=unused-variable,unused-import,import-outside-toplevel
 
 
 def test_exception_distilling(traceback):
@@ -75,7 +75,7 @@ def error_result():
 
 @pytest.fixture
 def installed_plugin(request, server_url):
-    from backslash.contrib import slash_plugin
+    from backslash.contrib import slash_plugin  # pylint: disable=import-outside-toplevel
     plugin = slash_plugin.BackslashPlugin(url=str(server_url), runtoken='blap')
 
     @request.addfinalizer

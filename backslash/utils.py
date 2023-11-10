@@ -38,4 +38,4 @@ def raise_for_status(resp: Response) -> None:
     except HTTPError as e:
         raise HTTPError(
             f'{e.response.request.method} {e.response.request.url}: {e.response.status_code}\n\n{e.response.content}',
-            response=resp, request=resp.request)
+            response=resp, request=resp.request) from None
