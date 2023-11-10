@@ -5,7 +5,6 @@ import hashlib
 import itertools
 import json
 import os
-import pkg_resources
 import socket
 import sys
 import time
@@ -27,7 +26,8 @@ from slash.plugins import PluginInterface, registers_on
 from slash.utils.conf_utils import Cmdline, Doc
 from urlobject import URLObject as URL
 from requests import HTTPError
-from .._compat import shellquote
+from shlex import quote as shellquote
+from packaging.version import parse as parse_version
 from ..client import Backslash as BackslashClient
 from ..exceptions import ParamsTooLarge
 from ..utils import ensure_dir
@@ -327,7 +327,7 @@ class BackslashPlugin(PluginInterface):
 
     def _get_test_info(self, test):
         if test.__slash__.is_interactive() and \
-           pkg_resources.parse_version(slash.__version__) < pkg_resources.parse_version('1.6.0'):
+           parse_version(slash.__version__) < parse_version('1.6.0'):
             returned = {
                 'file_name': '<interactive>',
                 'class_name': '<interactive>',

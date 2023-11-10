@@ -3,8 +3,6 @@ import linecache
 import os
 import types
 
-from .._compat import PY2
-
 try:
     from slash import config as slash_config
 except ImportError:
@@ -16,14 +14,9 @@ _SPECIAL_DIRS = ('.git', '.hg', '.svn')
 _HERE = os.path.abspath('.')
 
 _ALLOWED_ATTRIBUTE_TYPES = [int, str, float]
-if PY2:
-    _ALLOWED_ATTRIBUTE_TYPES.append(long) # pylint: disable=undefined-variable
 _ALLOWED_ATTRIBUTE_TYPES = tuple(_ALLOWED_ATTRIBUTE_TYPES)
 
 _FILTERED_MEMBER_TYPES = [types.MethodType, types.FunctionType, type]
-if PY2:
-    _FILTERED_MEMBER_TYPES.append(types.UnboundMethodType) # pylint: disable=no-member
-    _FILTERED_MEMBER_TYPES.append(types.ClassType) # pylint: disable=no-member
 _FILTERED_MEMBER_TYPES = tuple(_FILTERED_MEMBER_TYPES)
 
 _MAX_VARIABLE_VALUE_LENGTH = 100

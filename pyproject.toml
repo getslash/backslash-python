@@ -6,10 +6,16 @@ build-backend = "hatchling.build"
 name = "backslash"
 description = "Client library for the Backslash test reporting service"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = { text = "BSD 3-Clause License" }
 
-classifiers = ["Programming Language :: Python :: 3.7"]
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 dependencies = [
     "GitPython",
     "Logbook",

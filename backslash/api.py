@@ -12,7 +12,7 @@ from sentinels import NOTHING
 from urlobject import URLObject as URL
 
 from .__version__ import __version__ as BACKSLASH_CLIENT_VERSION
-from ._compat import BytesIO, TextIOWrapper, iteritems
+from io import BytesIO, TextIOWrapper
 from .comment import Comment
 from .error import Error
 from .exceptions import BackslashClientException, ParamsTooLarge
@@ -165,7 +165,7 @@ class API():
         if compute_memory_usage(params) > _MAX_PARAMS_UNCOMPRESSED_SIZE:
             raise ParamsTooLarge()
 
-        for param_name, param_value in iteritems(params):
+        for param_name, param_value in params.items():
             if param_value is NOTHING:
                 continue
             returned[param_name] = param_value
