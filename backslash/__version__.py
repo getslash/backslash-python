@@ -1,3 +1,4 @@
-import pkg_resources
+import importlib.metadata
 
-__version__ = pkg_resources.get_distribution('backslash').version
+
+__version__ = importlib.metadata.distribution("backslash").version

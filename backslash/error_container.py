@@ -2,7 +2,7 @@ import gzip
 import json
 import tempfile
 
-from ._compat import TextIOWrapper
+from io import TextIOWrapper
 
 import logbook
 from sentinels import NOTHING

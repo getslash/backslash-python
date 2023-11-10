@@ -3,7 +3,6 @@ import itertools
 
 from sentinels import NOTHING
 
-from ._compat import iteritems
 from .utils import raise_for_status
 
 
@@ -32,7 +31,7 @@ class LazyQuery():
         returned_url = self._url
         for filter_object in filter_objects:
             returned_url = filter_object.add_to_url(returned_url)
-        for field_name, field_value in iteritems(fields):
+        for field_name, field_value in fields.items():
             returned_url = returned_url.add_query_param(field_name, str(field_value))
         return LazyQuery(self._client, url=returned_url, page_size=self._page_size)
 
