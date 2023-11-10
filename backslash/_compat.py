@@ -9,6 +9,7 @@
 #pylint: disable=unused-argument
 #pylint: disable=unused-import
 #pylint: disable=exec-used
+#pylint: disable=unnecessary-lambda-assignment
 import sys
 from contextlib import contextmanager
 

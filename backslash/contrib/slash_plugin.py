@@ -17,7 +17,7 @@ import vintage
 
 try:
     import git
-except Exception as e: # pylint: disable=broad-except
+except Exception:  # pylint: disable=broad-except
     pass
 
 import slash
@@ -38,6 +38,7 @@ from ..session import APPEND_UPCOMING_TESTS_STR
 from ..__version__ import __version__ as BACKSLASH_CLIENT_VERSION
 
 _DEFAULT_CONFIG_FILENAME = os.path.expanduser('~/.backslash/config.json')
+_GET_TOKEN_TIMEOUT_SEC = 30
 
 _logger = logbook.Logger(__name__)
 
@@ -388,7 +389,7 @@ class BackslashPlugin(PluginInterface):
         returned = self._file_hash_cache.get(filename)
         if returned is None:
             try:
-                with open(filename, 'rb') as f:
+                with open(filename, 'rb', encoding='utf-8') as f:
                     data = f.read()
                     h = hashlib.sha1()
                     h.update('blob '.encode('utf-8'))
@@ -561,7 +562,7 @@ class BackslashPlugin(PluginInterface):
     def _get_config(self):
         if not os.path.isfile(self._config_filename):
             return {}
-        with open(self._config_filename) as f:
+        with open(self._config_filename, encoding='utf-8') as f:
             return json.load(f)
 
     def _save_token(self, token):
@@ -571,7 +572,7 @@ class BackslashPlugin(PluginInterface):
 
         ensure_dir(os.path.dirname(tmp_filename))
 
-        with open(tmp_filename, 'w') as f:
+        with open(tmp_filename, 'w', encoding='utf-8') as f:
             json.dump(cfg, f, indent=2)
         os.rename(tmp_filename, self._config_filename)
 
@@ -611,7 +612,7 @@ class BackslashPlugin(PluginInterface):
         opened_browser = False
         url = self._get_token_request_url()
         for retry in itertools.count():
-            resp = requests.get(url)
+            resp = requests.get(url, timeout=_GET_TOKEN_TIMEOUT_SEC)
             resp.raise_for_status()
             data = resp.json()
             if retry == 0:
