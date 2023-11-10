@@ -1,3 +1,0 @@
-alabaster
-releases
-Sphinx
