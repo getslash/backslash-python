@@ -44,6 +44,10 @@ testing = [
     "pytest-cov>=2.6",
     "URLObject",
     "weber-utils",
+    # Slash still using pkg_resources, installing setuptools as temporary workaround
+    # so this repo can be installed with UV
+    # Should be removed once a new version of slash will be released.
+    "setuptools<81",
 ]
 doc = ["alabaster", "releases", "Sphinx"]
 
@@ -53,4 +57,6 @@ source = "vcs"
 [tool.pytest]
 testpaths = "tests"
 timeout_method = "signal"
-addopts = "-ra -W error::DeprecationWarning"
+# Current slash version uses pkg_resources, deprecated module, which emits warnings.
+# This option (of consider warnings as errors) should be comment out, until a new slash version will be released.
+# addopts = "-ra -W error::DeprecationWarning"
