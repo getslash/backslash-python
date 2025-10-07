@@ -7,23 +7,71 @@ on:
     # manually triggered
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+      - name: Checkout the repository
+        uses: actions/checkout@main
+      - name: Install the default version of uv
+        id: setup-uv
+        uses: astral-sh/setup-uv@v3
+      - name: Print the installed version
+        run: echo "Installed uv version is ${{ steps.setup-uv.outputs.uv-version }}"
+      - name: Install Python ${{ matrix.python-version }}
+        run: uv python install  ${{ matrix.python-version }}
       - name: Install dependencies
-        run: make env
+        run: |
+          uv venv
+          uv pip install ".[testing]"
       - name: Lint with pylint
-        run: make pylint
+        run: .venv/bin/pylint --rcfile .pylintrc backslash tests
       - name: Test with pytest
-        run: make test
-      - name: Documentation
+        run: .venv/bin/pytest tests --cov=backslash --cov-report=html
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@main
+      - name: Install the default version of uv
+        id: setup-uv
+        uses: astral-sh/setup-uv@v3
+      - name: Building docs
         run: make doc
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: test
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install hatch
+        run: pip install hatch
+
+      - name: Build package
+        run: hatch build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: true
+          skip-existing: true

@@ -1,7 +1,8 @@
 Changelog
 =========
 
-* :feature:`-` Support python versions 3.8 to 3.12
+* :feature:`-` Use UV
+* :feature:`-` Support python versions 3.8 to 3.13
 * :feature:`-` Use pyproject.toml for project configuration
 * :feature:`104` Drop support for python version < 3.6
 * :release:`2.39.0 <03-07-2019>`
